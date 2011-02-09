@@ -1,0 +1,10 @@
+Copyright 2011 Marc S. Ressl
+
+==Installation==
+Just compile polo.c and polo.h into your project.
+
+Alternatively you can make a library out of it.
+
+In order to link, GLUT is required.
+
+This can be accomplished on GCC with the "-l glut" switch.
