@@ -18,8 +18,10 @@
  * - To exit graphics, call exitGraphics() from your user function.
  * - You must change settings and draw from the user function.
  *
- * Coordinate system:
- * The coordinate system (0, 0) is at the lower left.
+ * Specifications:
+ * - The coordinate system (0, 0) is at the lower left.
+ * - Color components (RGB, HSV, HSB) are in the range 0..255
+ *
  */
 
 #define Color int
@@ -68,7 +70,7 @@ void drawImage(int x, int y, Image image);
 // Mouse
 float getMouseX();
 float getMouseY();
-float getMouseButtonState(int buttonIndex);
+float isMouseButtonPressed(int buttonIndex);
 
 // Keyboard
 int getKeyboardKey();
