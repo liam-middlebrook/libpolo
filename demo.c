@@ -2,21 +2,14 @@
 
 void draw()
 {
-	int x = getMouseX();
-	int y = getMouseY();
-	int b = getMousePressed();
-
-	int k = getKeyPressed();
-
-	drawCircle(x, y, 100);
+	setFillColor(isMouseButtonPressed() ? POLO_WHITE : POLO_TRANSPARENT);
+	drawCircle(getMouseX(), getMouseY(), 50);
 }
 
 int main(int argc, char *argv[])
 {
-	// Init code here
-
 	setGraphicsDrawCallback(draw);
-	runGraphics(640, 480, 0);
+	runGraphics(640, 480, 0, "Mouse Painter");
 
 	return 0;
 }
