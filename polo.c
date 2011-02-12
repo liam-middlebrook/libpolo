@@ -8,19 +8,16 @@
  * Requires the GLUT library.
  */
 
-#include <stdio.h>
-
-
-
-
 #include <math.h>
 
 #include "polo.h"
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#include <GLUT/freeglut.h>
 #else
 #include <GL/glut.h>
+#include <GL/freeglut.h>
 #endif
 
 // Definitions
@@ -34,20 +31,21 @@ typedef struct
 	int height;
 	int isDrawing;
 	int window;
-	int key;
-	int mouseX;
-	int mouseY;
-	int mouseButtonState[POLO_MOUSEBUTTON_NUM];
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
+	void *font;
+	int key;
+	float mouseX;
+	float mouseY;
+	int mouseButtonState[POLO_MOUSEBUTTON_NUM];
 } PoloState;
 
 // Note: static variables should always be avoided. They are used here
 //       because GLUT does not pass a user pointer to the callbacks.
 static PoloState poloState;
 
-// callbacks
+// Callbacks
 static void drawCallback()
 {
 	if (poloState.drawCallback)
@@ -139,19 +137,37 @@ static void specialCallback(int key, int x, int y)
 
 static void mouseButtonCallback(int button, int state, int x, int y)
 {
-	printf("button %d, %d\n", x, y);
-
-	if (button < POLO_MOUSEBUTTON_NUM)
-		poloState.mouseButtonState[button] = state;
-}
-
-static void mouseMotionCallback(int x, int y)
-{
-	printf("motion %d, %d\n", x, y);
+	switch (button)
+	{
+		case GLUT_LEFT_BUTTON:
+			button = 0;
+			break;
+		case GLUT_RIGHT_BUTTON:
+			button = 1;
+			break;
+		case GLUT_MIDDLE_BUTTON:
+			button = 2;
+			break;
+		default:
+			return;
+	}
+	
+	if (state == GLUT_DOWN)
+		poloState.mouseButtonState[button] = 1;
+	else if (state == GLUT_UP)
+		poloState.mouseButtonState[button] = 0;
+	
 	poloState.mouseX = x;
 	poloState.mouseY = poloState.height - y;
 }
 
+static void mouseMotionCallback(int x, int y)
+{
+	poloState.mouseX = x;
+	poloState.mouseY = poloState.height - y;
+}
+
+// Initialization & exit
 void setUserData(void *userData)
 {
 	poloState.userData = userData;
@@ -162,7 +178,7 @@ void setPoloCallback(void (*poloCallback)(void *userData))
 	poloState.drawCallback = poloCallback;
 }
 
-void runPolo(int width, int height, int fullscreen, char *windowTitle)
+void initPolo(int width, int height, int fullscreen, char *windowTitle)
 {
 	int i;
 	
@@ -170,14 +186,14 @@ void runPolo(int width, int height, int fullscreen, char *windowTitle)
 	poloState.height = height;
 	poloState.isDrawing = 0;
 	poloState.window = 0;
+	setPenColor(POLO_WHITE);
+	setFillColor(POLO_TRANSPARENT);
+	setTextFont(POLO_HELVETICA_18);
 	poloState.key = 0;
 	poloState.mouseX = 0;
 	poloState.mouseY = 0;
 	for (i = 0; i < POLO_MOUSEBUTTON_NUM; i++)
 		poloState.mouseButtonState[i] = 0;
-	poloState.penColor = POLO_WHITE;
-	poloState.fillColor1 = POLO_TRANSPARENT;
-	poloState.fillColor2 = POLO_TRANSPARENT;
 	
 	int argc = 1;
 	char *argv[2] = {"polo", NULL};
@@ -189,13 +205,25 @@ void runPolo(int width, int height, int fullscreen, char *windowTitle)
 	if (fullscreen)
 		glutFullScreen();
 	
+	getRunTime();
+	
 	glutDisplayFunc(drawCallback);
 	glutIdleFunc(drawCallback);
 	glutKeyboardFunc(keyboardCallback);
 	glutSpecialFunc(specialCallback);
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
+	glutPassiveMotionFunc(mouseMotionCallback);
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glutSwapBuffers();
+}
+
+void runPolo()
+{
 	glutMainLoop();
 }
 
@@ -206,68 +234,87 @@ void exitPolo()
 	glutLeaveMainLoop();
 }
 
-Color getColorFromRGB(unsigned char red, unsigned char green, unsigned char blue)
+static float saturate(float value)
 {
-	return ((((int)red) << 24) +
-	        (((int)green) << 16) +
-	        (((int)blue) << 8) +
+	if (value < 0.0)
+		return 0.0;
+	if (value > 1.0)
+		return 1.0;
+	return value;
+}
+
+Color getColorFromRGB(float red, float green, float blue)
+{
+	float r = saturate(red);
+	float g = saturate(green);
+	float b = saturate(blue);
+
+	return ((((int)(r * 255.0)) << 24) +
+	        (((int)(g * 255.0)) << 16) +
+	        (((int)(b * 255.0)) << 8) +
 	        0xff);
 }
 
-Color getColorFromHSV(unsigned char hue, unsigned char saturation, unsigned char value)
+Color getColorFromHSV(float hue, float saturation, float value)
 {
-/*        int f;
-        long p, q, t;
- 
-        if (saturation == 0)
-		r = g = b = value;
+	float r, g, b;
+	
+	float h = hue - floor(hue);
+	float s = saturate(saturation);
+	float v = saturate(value);
+	
+	if (s == 0.0)
+		r = g = b = v;
 	else
 	{
-		int f = ((hue % 60) * 255) / 60;
-        h /= 60;
- 
-        p = (v * (256 – s))/256;
-        q = (v * ( 256 – (s * f)/256 ))/256;
-        t = (v * ( 256 – (s * ( 256 – f ))/256))/256;
- 
-        switch( h ) {
-                case 0:
-                        *r = v;
-                        *g = t;
-                        *b = p;
-                        break;
-                case 1:
-                        *r = q;
-                        *g = v;
-                        *b = p;
-                        break;
-                case 2:
-                        *r = p;
-                        *g = v;
-                        *b = t;
-                        break;
-                case 3:
-                        *r = p;
-                        *g = q;
-                        *b = v;
-                        break;
-                case 4:
-                        *r = t;
-                        *g = p;
-                        *b = v;
-                        break;
-                default:
-                        *r = v;
-                        *g = p;
-                        *b = q;
-                        break;
-        }*/
-	return 0;
-}
-
-Color getColorFromHSB(unsigned char hue, unsigned char saturation, unsigned char brightness)
-{
-	return 0;
+		// If hue == 1.0, then wrap it around the circle to 0.0
+		if (h == 1.0)
+			h = 0.0;
+		
+		h *= 6.0;			// sector 0 to 5
+		float i = floor(h);		// integer part of h (0,1,2,3,4,5 or 6)
+		float f = h - i;		// factorial part of h (0 to 1)
+		
+		float p = v * (1.0f - s);
+		float q = v * (1.0f - s * f);
+		float t = v * (1.0f - s * (1.0f - f));
+		
+		switch ((int) h)
+		{
+			case 0:
+				r = v;
+				g = t;
+				b = p;
+				break;
+			case 1:
+				r = q;
+				g = v;
+				b = p;
+				break;
+			case 2:
+				r = p;
+				g = v;
+				b = t;
+				break;
+			case 3:
+				r = p;
+				g = q;
+				b = v;
+				break;
+			case 4:
+				r = t;
+				g = p;
+				b = v;
+				break;
+			default:		// case 5 (or 6):
+				r = v;
+				g = p;
+				b = q;
+				break;
+		}
+	}
+	
+	return getColorFromRGB(r, g, b);
 }
 
 void setPenColor(Color color)
@@ -412,7 +459,7 @@ void drawCircle(float x, float y, float radius)
 	if (!poloState.isDrawing)
 		return;
 	
-	if (radius < 1.0)
+	if (radius < 0.001)
 		return;
 	
 	glBegin(GL_TRIANGLE_FAN);
@@ -434,15 +481,71 @@ void drawCircle(float x, float y, float radius)
 
 void setTextFont(enum PoloFont font)
 {
+	switch (font)
+	{
+		case POLO_COURIER_13:
+			poloState.font = GLUT_BITMAP_8_BY_13;
+			break;
+		case POLO_COURIER_15:
+			poloState.font = GLUT_BITMAP_9_BY_15;
+			break;
+		case POLO_TIMES_10:
+			poloState.font = GLUT_BITMAP_TIMES_ROMAN_10;
+			break;
+		case POLO_TIMES_24:
+			poloState.font = GLUT_BITMAP_TIMES_ROMAN_24;
+			break;
+		case POLO_HELVETICA_10:
+			poloState.font = GLUT_BITMAP_HELVETICA_10;
+			break;
+		case POLO_HELVETICA_12:
+			poloState.font = GLUT_BITMAP_HELVETICA_12;
+			break;
+		case POLO_HELVETICA_18:
+		default:
+			poloState.font = GLUT_BITMAP_HELVETICA_18;
+			break;
+	}
 }
 
-int getTextDrawWidth(char *str)
+float getTextDrawWidth(char *str)
 {
-	return 0;
+	return glutBitmapLength(poloState.font, str);
+}
+
+float getTextDrawHeight(char *str)
+{
+	int i = 1;
+	while (*str)
+	{
+		if (*str == '\n')
+			i++;
+		
+		str++;
+	}
+	
+	return i * glutBitmapHeight(poloState.font);
 }
 
 void drawText(float x, float y, char *str)
 {
+	y += getTextDrawHeight(str);
+	
+	y += 5;
+	y -= glutBitmapHeight(poloState.font);
+	glRasterPos2f(x, y);
+	while(*str)
+	{
+		if (*str == '\n')
+		{
+			y -= glutBitmapHeight(poloState.font);
+			glRasterPos2f(x, y);
+		}
+		else
+			glutBitmapCharacter(poloState.font, *str);
+		
+		str++;
+	}
 }
 
 Image loadImage(char *path)
@@ -501,7 +604,7 @@ void setMouseButtonCallback(void *keyCallback(void *userData, int button, int st
 
 float getRunTime()
 {
-	return 0.0;
+	return glutGet(GLUT_ELAPSED_TIME) * 0.001;
 }
 
 void showMousePointer()

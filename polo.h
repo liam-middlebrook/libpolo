@@ -20,7 +20,7 @@
  *
  * Specifications:
  * - The coordinate system (0, 0) is at the lower left.
- * - Color components (RGB, HSV, HSB) are in the range 0..255.
+ * - Color components (RGB, HSV, HSB) are in the range 0.0 to 1.0.
  * - Alpha is the level of opacity.
  * - Images must be in uncompressed BMP format, using either
  *   24-bit RGB or 32-bit RGBA (for transparency).
@@ -37,7 +37,8 @@ extern "C" {
 // Initialization & exit
 void setPoloUserData(void *userData);
 void setPoloCallback(void (*drawCallback)(void *userData));
-void runPolo(int width, int height, int fullscreen, char *windowTitle);
+void initPolo(int width, int height, int fullscreen, char *windowTitle);
+void runPolo();
 void exitPolo();
 
 // Colors
@@ -97,9 +98,8 @@ enum PoloColors
     POLO_NICKEL         = 0x808080ff,
 };
 
-Color getColorFromRGB(unsigned char red, unsigned char green, unsigned char blue);
-Color getColorFromHSV(unsigned char hue, unsigned char saturation, unsigned char value);
-Color getColorFromHSB(unsigned char hue, unsigned char saturation, unsigned char brightness);
+Color getColorFromRGB(float red, float green, float blue);
+Color getColorFromHSV(float hue, float saturation, float value);
 
 void setPenColor(Color color);
 void setFillColor(Color color);
@@ -118,8 +118,8 @@ void drawCircle(float x, float y, float radius);
 // Text
 enum PoloFont
 {
-    POLO_COURIER_8,
-    POLO_COURIER_9,
+    POLO_COURIER_13,
+    POLO_COURIER_15,
     POLO_TIMES_10,
     POLO_TIMES_24,
     POLO_HELVETICA_10,
@@ -127,7 +127,8 @@ enum PoloFont
     POLO_HELVETICA_18,
 };
 void setTextFont(enum PoloFont font);
-int getTextDrawWidth(char *str);
+float getTextDrawWidth(char *str);
+float getTextDrawHeight(char *str);
 void drawText(float x, float y, char *str);
 
 // Images
