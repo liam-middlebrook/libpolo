@@ -3,19 +3,25 @@
 
 void draw(void *userData)
 {
-//	clearScreen();
+	int x, y;
+
+	setPenColor(POLO_TRANSPARENT);
 	setFillColor(POLO_CANTALOUPE);
-//	setFillColor(isMouseButtonPressed(0) ? POLO_WHITE : POLO_TRANSPARENT);
-	drawCircle(getMouseX(), getMouseY(), 5.0);
+	for (x = 0; x < 640; x++)
+		for (y = 0; y < 480; y++)
+		{
+			setPenColor(getColorFromHSV(x * x / 320.0 / 320.0-0.5, y / 240.0-0.5, 1.0));
+			drawPoint(x, y);
+		}
 }
 
 int main(int argc, char *argv[])
 {
+	initPolo(640, 480, 0, "Mouse Painter");
+
 	setPoloCallback(draw);
-	runPolo(640, 480, 1, "Mouse Painter");
+	draw(NULL);
 
-	printf("Chau\n");
-
-	return 0;
+	runPolo();
 }
-
+	
