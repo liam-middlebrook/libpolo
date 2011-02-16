@@ -204,8 +204,8 @@ static void mouseMotionCallback(int x, int y)
 
 static void timerCallback(int value)
 {
-//	if (poloState.mouseMotionCallback)
-//		poloState.mouseMotionCallback(poloState.userData, x, y);
+	if (poloState.timerCallback)
+		poloState.timerCallback(poloState.userData, value);
 }
 
 // Initialization & exit
@@ -778,16 +778,16 @@ void hideMousePointer()
 	glutSetCursor(GLUT_CURSOR_NONE);
 }
 
-// Timer
+// Time
 
 void setTimerCallback(void (*timerCallback)(void *userData, int id))
 {
-	
+	poloState.timerCallback = timerCallback;
 }
 
 void runTimer(int id, int milliseconds)
 {
-
+	glutTimerFunc(milliseconds, timerCallback, id);
 }
 
 float getRunTime()

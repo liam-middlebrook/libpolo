@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 {
 	initPolo(640, 480, 0, "Mouse Painter");
 	setDrawCallback(draw);
-	image = loadImage("animal.bmp");
+	image = loadImage("demo.bmp");
 	runPolo();
 }
 
