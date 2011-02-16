@@ -152,6 +152,7 @@ void exitPolo();
 
 // Drawing
 void setDrawCallback(void (*drawCallback)(void *userData));
+void setResizeCallback(void (*drawCallback)(void *userData, int width, int height));
 
 Color getColorFromRGB(float red, float green, float blue);
 Color getColorFromHSV(float hue, float saturation, float value);
@@ -169,6 +170,8 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 void drawCircle(float x, float y, float radius);
 void clearScreen();
 void updateScreen();
+int getScreenWidth();
+int getScreenHeight();
 
 void setTextFont(enum PoloFont font);
 float getTextDrawWidth(char *str);

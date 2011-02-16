@@ -26,7 +26,6 @@ void draw(void *userData)
 		          getMouseY() - getImageHeight(d->image) / 2,
 		          d->image);
 	
-	if (t < 2)
 	{
 //	setGradientFillColors(POLO_CANTALOUPE, POLO_MARASCHINO);
 	setPenColor(POLO_TRANSPARENT);
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 {
 	DemoData demoData;
 	
-	initPolo(640, 480, 0, "Mouse Painter");
+	initPolo(640, 480, 1, "Mouse Painter");
 	setPoloUserData(&demoData);
 	
 	setDrawCallback(draw);
