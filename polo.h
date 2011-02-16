@@ -180,7 +180,7 @@ void drawImage(float x, float y, Image image);
 
 // Keyboard
 void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key));
-int getPressedKey();
+int isKeyPressed();
 
 // Mouse
 void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y));
