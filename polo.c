@@ -37,7 +37,8 @@ typedef struct
 
 typedef struct
 {
-	PoloImage images[POLO_MAX_IMAGES];
+	int width;
+	int height;
 	void *userData;
 	void (*drawCallback)(void *userData);
 	void (*keyboardCallback)(void *userData, int key);
@@ -47,6 +48,8 @@ typedef struct
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
+	float imageAlpha;
+	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
 	int key;
 	float mouseX;
@@ -93,6 +96,13 @@ static void drawCallback()
 	// Recover current output
 	
 	updateScreen();
+}
+
+static void resizeCallback()
+{
+	glutReshapeFunc(NULL);
+	glutReshapeWindow(poloState.width, poloState.height);
+	glutReshapeFunc(resizeCallback);
 }
 
 static void keyboardCallback(unsigned char key, int x, int y)
@@ -218,15 +228,15 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 {
 	int i;
 	
+	// Init state
+	poloState.width = width;
+	poloState.height = height;
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
+	setImageAlpha(1.0);
 	setTextFont(POLO_HELVETICA_18);
-	poloState.key = 0;
-	poloState.mouseX = 0;
-	poloState.mouseY = 0;
-	for (i = 0; i < POLO_MOUSEBUTTON_NUM; i++)
-		poloState.mouseButtonState[i] = 0;
 	
+	// Init freeglut
 	int argc = 1;
 	char *argv[2] = {"polo", NULL};
 	glutInit(&argc, argv);
@@ -237,25 +247,31 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	if (fullscreen)
 		glutFullScreen();
 	
+	// Init run time (so it starts at 0 on all systems)
 	getRunTime();
 	
+	// Set internal callbacks
 	glutDisplayFunc(drawCallback);
 	glutIdleFunc(drawCallback);
-//	glutShapeFunc(shapeCallback);
-	
+	glutReshapeFunc(resizeCallback);
 	glutKeyboardFunc(keyboardCallback);
 	glutSpecialFunc(specialCallback);
-	
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
 	
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 	
+	// Set OpenGL options
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glEnable(GL_TEXTURE_2D);
+	
+	// Clear front and back buffer
+	clearScreen();
+	updateScreen();
+	clearScreen();
 }
 
 void runPolo()
@@ -681,6 +697,31 @@ Image loadImage(char *path)
 	return image;
 }
 
+int getImageWidth(Image image)
+{
+	PoloImage *poloImage;
+	
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	return poloState.images[image].width;
+}
+
+int getImageHeight(Image image)
+{
+	PoloImage *poloImage;
+	
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	return poloState.images[image].height;
+}
+
+void setImageAlpha(float alpha)
+{
+	poloState.imageAlpha = alpha;
+}
+
 void drawImage(float x, float y, Image image)
 {
 	PoloImage *poloImage;
@@ -696,10 +737,10 @@ void drawImage(float x, float y, Image image)
 	
 	width = ((float) poloImage->width) / poloImage->textureWidth;
 	height = ((float) poloImage->height) / poloImage->textureHeight;
-
+	
 	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 	
-	glColor4f(1, 1, 1, 1);
+	glColor4f(1, 1, 1, poloState.imageAlpha);
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
@@ -721,6 +762,10 @@ void freeImage(Image image)
 	glDeleteTextures(1, &poloState.images[image].texture);
 	
 	poloState.images[image].texture = 0;
+	poloState.images[image].textureWidth = 0;
+	poloState.images[image].textureHeight = 0;
+	poloState.images[image].width = 0;
+	poloState.images[image].height = 0;
 }
 
 // Keyboard
@@ -730,12 +775,14 @@ void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key))
 	poloState.keyboardCallback = keyboardCallback;
 }
 
-int getPressedKey()
+int getKey()
 {
-	int key = poloState.key;
+	return poloState.key;
+}
+
+void clearKey()
+{
 	poloState.key = 0;
-	
-	return key;
 }
 
 // Mouse

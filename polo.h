@@ -155,6 +155,7 @@ void setDrawCallback(void (*drawCallback)(void *userData));
 
 Color getColorFromRGB(float red, float green, float blue);
 Color getColorFromHSV(float hue, float saturation, float value);
+
 void setPenColor(Color color);
 void setFillColor(Color color);
 void setGradientFillColors(Color color1, Color color2);
@@ -175,12 +176,16 @@ float getTextDrawHeight(char *str);
 void drawText(float x, float y, char *str);
 
 Image loadImage(char *path);
-void freeImage(Image image);
+int getImageWidth(Image image);
+int getImageHeight(Image image);
 void drawImage(float x, float y, Image image);
+void setImageAlpha(float alpha);
+void freeImage(Image image);
 
 // Keyboard
 void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key));
-int isKeyPressed();
+int getKey();
+void clearKey();
 
 // Mouse
 void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y));
