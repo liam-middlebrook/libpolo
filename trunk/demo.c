@@ -10,13 +10,15 @@ void draw(void *userData)
 {
 	DemoData *d = (DemoData *) userData;
 	
+	static int t = 0;
+	
 	if (getKey() == 27)
 		exitPolo();
 	
-	setPenColor(POLO_TRANSPARENT);
-	setGradientFillColors(POLO_IRON, POLO_STEEL);
+/*	setPenColor(POLO_TRANSPARENT);
+	setGradientFillColors(POLO_IRON, POLO_WHITE);
 	drawRect(0, 0, 80, 480);
-	
+*/	
 	if (isMouseButtonPressed(1))
 		clearScreen();
 	if (isMouseButtonPressed(0))
@@ -24,8 +26,15 @@ void draw(void *userData)
 		          getMouseY() - getImageHeight(d->image) / 2,
 		          d->image);
 	
-	setGradientFillColors(POLO_CANTALOUPE, POLO_MARASCHINO);
-	drawRect(getMouseX(), getMouseY(), 40, 400);
+	if (t < 2)
+	{
+//	setGradientFillColors(POLO_CANTALOUPE, POLO_MARASCHINO);
+	setPenColor(POLO_TRANSPARENT);
+	setFillColor((t % 2) ? POLO_WHITE : POLO_BLACK);
+	drawRect(0, 0, 640, 480);
+	}
+	
+	t++;
 }
 
 int main(int argc, char *argv[])

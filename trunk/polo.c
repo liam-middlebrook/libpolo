@@ -5,8 +5,10 @@
  * (C) 2011 by Marc S. Ressl (mressl@umich.edu)
  * Released under the GPL
  *
- * Requires the freeglut library.
+ * Requires the glut library.
  */
+
+// Includes
 
 #include <math.h>
 #include <stdio.h>
@@ -14,17 +16,37 @@
 
 #include "polo.h"
 
+// #define USE_FREEGLUT
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
+#ifdef USE_FREEGLUT
 #include <GLUT/freeglut.h>
+#endif // USE_FREEGLUT
 #else
 #include <GL/glut.h>
+#ifdef USE_FREEGLUT 
 #include <GL/freeglut.h>
+#endif // USE_FREEGLUT
+#endif // __APPLE__
+
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
 #endif
+
+#ifndef GL_BGRA
+#define GL_BGRA GL_BGRA_EXT
+#endif
+
+#ifndef GL_BGR
+#define GL_BGR GL_BGR_EXT
+#endif
+
+
 
 // Definitions
 #define POLO_MOUSEBUTTON_NUM	3
-#define POLO_MAX_IMAGES		1024
+#define POLO_MAX_IMAGES			1024
 
 typedef struct
 {
@@ -71,10 +93,14 @@ typedef struct
 	unsigned char compression[4];
 } PoloBMPHeader;
 
+
+
 // Static variables
 // Note: static variables should always be avoided. They are used here
 //       because freeglut does not pass a user pointer to the callbacks.
 static PoloState poloState;
+
+
 
 // Private callbacks
 static void drawCallback()
@@ -96,13 +122,6 @@ static void drawCallback()
 	// Recover current output
 	
 	updateScreen();
-}
-
-static void resizeCallback()
-{
-	glutReshapeFunc(NULL);
-	glutReshapeWindow(poloState.width, poloState.height);
-	glutReshapeFunc(resizeCallback);
 }
 
 static void keyboardCallback(unsigned char key, int x, int y)
@@ -218,6 +237,8 @@ static void timerCallback(int value)
 		poloState.timerCallback(poloState.userData, value);
 }
 
+
+
 // Initialization & exit
 void setPoloUserData(void *userData)
 {
@@ -226,7 +247,8 @@ void setPoloUserData(void *userData)
 
 void initPolo(int width, int height, int fullscreen, char *windowTitle)
 {
-	int i;
+	int argc = 1;
+	char *argv[2] = {"polo", NULL};
 	
 	// Init state
 	poloState.width = width;
@@ -236,9 +258,7 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	setImageAlpha(1.0);
 	setTextFont(POLO_HELVETICA_18);
 	
-	// Init freeglut
-	int argc = 1;
-	char *argv[2] = {"polo", NULL};
+	// Init glut
 	glutInit(&argc, argv);
 	
 	glutInitWindowSize(width, height);
@@ -253,14 +273,15 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	// Set internal callbacks
 	glutDisplayFunc(drawCallback);
 	glutIdleFunc(drawCallback);
-	glutReshapeFunc(resizeCallback);
 	glutKeyboardFunc(keyboardCallback);
 	glutSpecialFunc(specialCallback);
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
 	
+#ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
+#endif
 	
 	// Set OpenGL options
 	glEnable(GL_BLEND);
@@ -281,8 +302,14 @@ void runPolo()
 
 void exitPolo()
 {
+#ifdef USE_FREEGLUT
 	glutLeaveMainLoop();
+#else
+	exit(0);
+#endif
 }
+
+
 
 // Drawing
 
@@ -324,6 +351,8 @@ Color getColorFromHSV(float hue, float saturation, float value)
 		r = g = b = v;
 	else
 	{
+		float i, f, p, q, t;
+		
 		// If hue == 1.0, then wrap it around the circle to 0.0
 		if (h == 1.0)
 			h = 0.0;
@@ -331,13 +360,13 @@ Color getColorFromHSV(float hue, float saturation, float value)
 		// sector 0 to 5
 		h *= 6.0;
 		// integer part of h (0,1,2,3,4,5 or 6)
-		float i = floor(h);
+		i = floor(h);
 		// factorial part of h (0 to 1)
-		float f = h - i;
+		f = h - i;
 		
-		float p = v * (1.0f - s);
-		float q = v * (1.0f - s * f);
-		float t = v * (1.0f - s * (1.0f - f));
+		p = v * (1.0f - s);
+		q = v * (1.0f - s * f);
+		t = v * (1.0f - s * (1.0f - f));
 		
 		switch ((int) h)
 		{
@@ -422,7 +451,7 @@ void drawLine(float x1, float y1, float x2, float y2)
 
 void drawRect(float x, float y, float width, float height)
 {
-	if ((width < 0.0) || (height < 0.0))
+	if ((width < 0) || (height < 0))
 		return;
 	
 	glBegin(GL_QUADS);
@@ -652,6 +681,7 @@ Image loadImage(char *path)
 	
 	if (valid)
 	{
+		// OpenGL requires textures of size 2^m, 2^n
 		int textureWidth = getNextPowerOf2(width);
 		int textureHeight = getNextPowerOf2(height);
 		
@@ -662,9 +692,10 @@ Image loadImage(char *path)
 		{
 			fseek(fp, pixelsOffset, SEEK_SET);
 			
+			// Read line by line from image
 			for (y = 0; y < height; y++)
 				fread(&p[y * textureWidth * bytesPerPixel], width * bytesPerPixel, 1, fp);
-				
+			
 			image = getFreeImage();
 			if (image)
 			{
@@ -681,6 +712,8 @@ Image loadImage(char *path)
 					     textureWidth, textureHeight,
 					     0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
 					     GL_UNSIGNED_BYTE, p);
+				
+				glBindTexture(GL_TEXTURE_2D, 0);
 				
 				poloImage->textureWidth = textureWidth;
 				poloImage->textureHeight = textureHeight;
@@ -699,20 +732,16 @@ Image loadImage(char *path)
 
 int getImageWidth(Image image)
 {
-	PoloImage *poloImage;
-	
 	if (image >= POLO_MAX_IMAGES)
-		return;
+		return 0;
 	
 	return poloState.images[image].width;
 }
 
 int getImageHeight(Image image)
 {
-	PoloImage *poloImage;
-	
 	if (image >= POLO_MAX_IMAGES)
-		return;
+		return 0;
 	
 	return poloState.images[image].height;
 }
@@ -752,6 +781,8 @@ void drawImage(float x, float y, Image image)
 	glTexCoord2f(0, height);
 	glVertex2f(x, y + poloImage->height);
 	glEnd();
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void freeImage(Image image)
@@ -767,6 +798,8 @@ void freeImage(Image image)
 	poloState.images[image].width = 0;
 	poloState.images[image].height = 0;
 }
+
+
 
 // Keyboard
 
@@ -784,6 +817,8 @@ void clearKey()
 {
 	poloState.key = 0;
 }
+
+
 
 // Mouse
 
@@ -824,6 +859,8 @@ void hideMousePointer()
 {
 	glutSetCursor(GLUT_CURSOR_NONE);
 }
+
+
 
 // Time
 
