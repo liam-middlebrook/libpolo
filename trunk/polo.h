@@ -5,25 +5,39 @@
  * (C) 2011 by Marc S. Ressl (mressl@umich.edu)
  * Released under the GPL
  *
- * Requires the GLUT library.
+ * Requires the freeglut library.
  */
 
 /*
- * Usage:
+ * Basics:
+ * - Call initPolo() to initialize the graphics window.
+ * - Polo continuously calls a user function to redraw the screen. 
+ *   Use setDrawCallback() to define this function.
+ * - Call runPolo() to run graphics and get your user function called.
+ * - To close the graphics window, call exitPolo().
  *
- * - Add polo.c and polo.h to your project.
- * - polo continuously calls a user function to redraw the screen.
- *   Call setDrawCallback() to define this function.
- * - Call runGraphics() to run graphics and get your user function called.
- * - To exit graphics, call exitGraphics() from your user function.
- * - Always draw from your user function.
- *
- * Specifications:
+ * Drawing:
  * - The coordinate system (0, 0) is at the lower left.
  * - Color components (RGB, HSV, HSB) are in the range 0.0 to 1.0.
  * - Alpha is the level of opacity.
  * - Images must be in uncompressed BMP format, using either
- *   24-bit RGB or 32-bit RGBA (for transparency).
+ *   24-bit RGB or 32-bit RGBA (for alpha transparency).
+ * - Images can only be used after Polo was initialized.
+ * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
+ *   This reference is 0 if the image could not be loaded.
+ * - Use drawImage() to draw an image to screen.
+ * - Use freeImage() after you finished using your image.
+ *
+ * Keyboard and mouse:
+ * - You can use getPressedKey(), getMouseX(), getMouseY() and getMouseButtonState()
+ *   to query the keyboard and mouse.
+ * - Keyboard codes are in UNICODE. Special keys are defined in PoloKeys.
+ *
+ * Notifications:
+ * - Polo can call you when certain events occur.
+ * - Use setKeyboardCallback() to get notified when a keyboard key is pressed.
+ * - Use setMouseMotionCallback() to get notified when the mouse is moved.
+ * - Use setMouseButtonCallback() to get notified when a mouse button's state changes.
  *
  */
 
@@ -31,17 +45,10 @@
 extern "C" {
 #endif
 
+// Definitions
 #define Color int
 #define Image int
 
-// Initialization & exit
-void setPoloUserData(void *userData);
-void setPoloCallback(void (*drawCallback)(void *userData));
-void initPolo(int width, int height, int fullscreen, char *windowTitle);
-void runPolo();
-void exitPolo();
-
-// Colors
 enum PoloColors
 {
     POLO_TRANSPARENT    = 0x00000000,
@@ -98,52 +105,12 @@ enum PoloColors
     POLO_NICKEL         = 0x808080ff,
 };
 
-Color getColorFromRGB(float red, float green, float blue);
-Color getColorFromHSV(float hue, float saturation, float value);
-
-void setPenColor(Color color);
-void setFillColor(Color color);
-void setGradientFillColors(Color color1, Color color2);
-
-// Drawing Primitives
-void clearScreen();
-void drawPoint(float x, float y);
-void drawLine(float x1, float y1, float x2, float y2);
-void drawRect(float x, float y, float width, float height);
-void drawRoundedRect(float x, float y, float width, float height, float edgeRadius);
-void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
-void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-void drawCircle(float x, float y, float radius);
-
-// Text
-enum PoloFont
-{
-    POLO_COURIER_13,
-    POLO_COURIER_15,
-    POLO_TIMES_10,
-    POLO_TIMES_24,
-    POLO_HELVETICA_10,
-    POLO_HELVETICA_12,
-    POLO_HELVETICA_18,
-};
-void setTextFont(enum PoloFont font);
-float getTextDrawWidth(char *str);
-float getTextDrawHeight(char *str);
-void drawText(float x, float y, char *str);
-
-// Images
-Image loadImage(char *path);
-void freeImage(Image image);
-void drawImage(float x, float y, Image image);
-
-// Mouse
-float getMouseX();
-float getMouseY();
-int isMouseButtonPressed(int buttonIndex);
-
-// Keyboard
 enum PoloKey
 {
+	POLO_BACKSPACE = 0x08,
+	POLO_TAB = 0x09,
+	POLO_ENTER = 0x0d,
+	POLO_ESC = 0x1b,
 	POLO_F1 = 0xe000,
 	POLO_F2,
 	POLO_F3,
@@ -165,15 +132,69 @@ enum PoloKey
 	POLO_HOME,
 	POLO_END,
 };
+
+enum PoloFont
+{
+    POLO_COURIER_13,
+    POLO_COURIER_15,
+    POLO_TIMES_10,
+    POLO_TIMES_24,
+    POLO_HELVETICA_10,
+    POLO_HELVETICA_12,
+    POLO_HELVETICA_18,
+};
+
+// Initialization & exit
+void setPoloUserData(void *userData);
+void initPolo(int width, int height, int fullscreen, char *windowTitle);
+void runPolo();
+void exitPolo();
+
+// Drawing
+void setDrawCallback(void (*drawCallback)(void *userData));
+
+Color getColorFromRGB(float red, float green, float blue);
+Color getColorFromHSV(float hue, float saturation, float value);
+void setPenColor(Color color);
+void setFillColor(Color color);
+void setGradientFillColors(Color color1, Color color2);
+
+void drawPoint(float x, float y);
+void drawLine(float x1, float y1, float x2, float y2);
+void drawRect(float x, float y, float width, float height);
+void drawRoundedRect(float x, float y, float width, float height, float edgeRadius);
+void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
+void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+void drawCircle(float x, float y, float radius);
+void clearScreen();
+void updateScreen();
+
+void setTextFont(enum PoloFont font);
+float getTextDrawWidth(char *str);
+float getTextDrawHeight(char *str);
+void drawText(float x, float y, char *str);
+
+Image loadImage(char *path);
+void freeImage(Image image);
+void drawImage(float x, float y, Image image);
+
+// Keyboard
+void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key));
 int getPressedKey();
 
-// Advanced
-void setKeyboardCallback(void *keyCallback(void *userData, int key), void *userData);
-void setMouseMotionCallback(void *keyCallback(void *userData, int x, int y), void *userData);
-void setMouseButtonCallback(void *keyCallback(void *userData, int button, int state), void *userData);
-float getRunTime();
+// Mouse
+void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y));
+void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int state));
+float getMouseX();
+float getMouseY();
+int isMouseButtonPressed(int buttonIndex);
 void showMousePointer();
 void hideMousePointer();
+
+// Time
+void setTimerCallback(void (*timerCallback)(void *userData, int id));
+void runTimer(int id, int milliseconds);
+float getRunTime();
 
 #ifdef __cplusplus
 }
