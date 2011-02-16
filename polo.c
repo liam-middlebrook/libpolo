@@ -5,10 +5,12 @@
  * (C) 2011 by Marc S. Ressl (mressl@umich.edu)
  * Released under the GPL
  *
- * Requires the GLUT library.
+ * Requires the freeglut library.
  */
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "polo.h"
 
@@ -22,15 +24,26 @@
 
 // Definitions
 #define POLO_MOUSEBUTTON_NUM	3
+#define POLO_MAX_IMAGES		1024
 
 typedef struct
 {
-	void *userData;
-	void (*drawCallback)(void *userData);
+	int texture;
+	int textureWidth;
+	int textureHeight;
 	int width;
 	int height;
-	int isDrawing;
-	int window;
+} PoloImage;
+
+typedef struct
+{
+	PoloImage images[POLO_MAX_IMAGES];
+	void *userData;
+	void (*drawCallback)(void *userData);
+	void (*keyboardCallback)(void *userData, int key);
+	void (*mouseMotionCallback)(void *userData, int x, int y);
+	void (*mouseButtonCallback)(void *userData, int button, int state);
+	void (*timerCallback)(void *userData, int id);
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
@@ -41,26 +54,45 @@ typedef struct
 	int mouseButtonState[POLO_MOUSEBUTTON_NUM];
 } PoloState;
 
+typedef struct
+{
+	unsigned char id[2];
+	unsigned char size[4];
+	unsigned char reserved[4];
+	unsigned char pixelsOffset[4];
+	unsigned char headerSize[4];
+	unsigned char width[4];
+	unsigned char height[4];
+	unsigned char numberOfPlanes[2];
+	unsigned char bitsPerPixel[2];
+	unsigned char compression[4];
+} PoloBMPHeader;
+
+// Static variables
 // Note: static variables should always be avoided. They are used here
-//       because GLUT does not pass a user pointer to the callbacks.
+//       because freeglut does not pass a user pointer to the callbacks.
 static PoloState poloState;
 
-// Callbacks
+// Private callbacks
 static void drawCallback()
 {
+	// Draw stored texture
+	
 	if (poloState.drawCallback)
 	{
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glTranslatef(-1.0, -1.0, 0.0);
-		glScalef(2.0 / poloState.width, 2.0 / poloState.height, 1.0);
+		glScalef(2.0 / glutGet(GLUT_WINDOW_WIDTH),
+		         2.0 / glutGet(GLUT_WINDOW_HEIGHT),
+		         1.0);
 		
-		poloState.isDrawing = 1;
 		poloState.drawCallback(poloState.userData);
-		poloState.isDrawing = 0;
-		
-		glutSwapBuffers();
 	}
+	
+	// Recover current output
+	
+	updateScreen();
 }
 
 static void keyboardCallback(unsigned char key, int x, int y)
@@ -157,35 +189,35 @@ static void mouseButtonCallback(int button, int state, int x, int y)
 	else if (state == GLUT_UP)
 		poloState.mouseButtonState[button] = 0;
 	
-	poloState.mouseX = x;
-	poloState.mouseY = poloState.height - y;
+	if (poloState.mouseMotionCallback)
+		poloState.mouseMotionCallback(poloState.userData, x, y);
 }
 
 static void mouseMotionCallback(int x, int y)
 {
 	poloState.mouseX = x;
-	poloState.mouseY = poloState.height - y;
+	poloState.mouseY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+	
+	if (poloState.mouseMotionCallback)
+		poloState.mouseMotionCallback(poloState.userData, x, y);
+}
+
+static void timerCallback(int value)
+{
+//	if (poloState.mouseMotionCallback)
+//		poloState.mouseMotionCallback(poloState.userData, x, y);
 }
 
 // Initialization & exit
-void setUserData(void *userData)
+void setPoloUserData(void *userData)
 {
 	poloState.userData = userData;
-}
-
-void setPoloCallback(void (*poloCallback)(void *userData))
-{
-	poloState.drawCallback = poloCallback;
 }
 
 void initPolo(int width, int height, int fullscreen, char *windowTitle)
 {
 	int i;
 	
-	poloState.width = width;
-	poloState.height = height;
-	poloState.isDrawing = 0;
-	poloState.window = 0;
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
 	setTextFont(POLO_HELVETICA_18);
@@ -201,7 +233,7 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	
 	glutInitWindowSize(width, height);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	poloState.window = glutCreateWindow(windowTitle);
+	glutCreateWindow(windowTitle);
 	if (fullscreen)
 		glutFullScreen();
 	
@@ -209,17 +241,21 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	
 	glutDisplayFunc(drawCallback);
 	glutIdleFunc(drawCallback);
+//	glutShapeFunc(shapeCallback);
+	
 	glutKeyboardFunc(keyboardCallback);
 	glutSpecialFunc(specialCallback);
+	
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
+	
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glutSwapBuffers();
+	
+	glEnable(GL_TEXTURE_2D);
 }
 
 void runPolo()
@@ -229,9 +265,14 @@ void runPolo()
 
 void exitPolo()
 {
-	glutDestroyWindow(poloState.window);
-	
 	glutLeaveMainLoop();
+}
+
+// Drawing
+
+void setDrawCallback(void (*drawCallback)(void *userData))
+{
+	poloState.drawCallback = drawCallback;
 }
 
 static float saturate(float value)
@@ -248,7 +289,7 @@ Color getColorFromRGB(float red, float green, float blue)
 	float r = saturate(red);
 	float g = saturate(green);
 	float b = saturate(blue);
-
+	
 	return ((((int)(r * 255.0)) << 24) +
 	        (((int)(g * 255.0)) << 16) +
 	        (((int)(b * 255.0)) << 8) +
@@ -271,9 +312,12 @@ Color getColorFromHSV(float hue, float saturation, float value)
 		if (h == 1.0)
 			h = 0.0;
 		
-		h *= 6.0;			// sector 0 to 5
-		float i = floor(h);		// integer part of h (0,1,2,3,4,5 or 6)
-		float f = h - i;		// factorial part of h (0 to 1)
+		// sector 0 to 5
+		h *= 6.0;
+		// integer part of h (0,1,2,3,4,5 or 6)
+		float i = floor(h);
+		// factorial part of h (0 to 1)
+		float f = h - i;
 		
 		float p = v * (1.0f - s);
 		float q = v * (1.0f - s * f);
@@ -306,7 +350,8 @@ Color getColorFromHSV(float hue, float saturation, float value)
 				g = p;
 				b = v;
 				break;
-			default:		// case 5 (or 6):
+			// case 5 (or 6):
+			default:
 				r = v;
 				g = p;
 				b = q;
@@ -342,41 +387,26 @@ static void setPoloColor(Color color)
 	          ((color & 0x000000ff) >> 0) / 255.0);
 }
 
-void clearScreen()
-{
-	if (!poloState.isDrawing)
-		return;
-	
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void drawPoint(float x, float y)
 {
-	if (!poloState.isDrawing)
-		return;
-	
 	glBegin(GL_POINTS);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x, y);
+	glVertex2f(x + 0.5, y + 0.5);
 	glEnd();
 }
 
 void drawLine(float x1, float y1, float x2, float y2)
 {
-	if (!poloState.isDrawing)
-		return;
-	
 	glBegin(GL_LINES);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x2 + 0.5, y2 + 0.5);
 	glEnd();
 }
 
 void drawRect(float x, float y, float width, float height)
 {
-	if (!poloState.isDrawing)
+	if ((width < 0.0) || (height < 0.0))
 		return;
 	
 	glBegin(GL_QUADS);
@@ -390,74 +420,62 @@ void drawRect(float x, float y, float width, float height)
 
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x, y);
-	glVertex2f(x + width, y);
-	glVertex2f(x + width, y + height);
-	glVertex2f(x, y + height);
-	glVertex2f(x, y);
+	glVertex2f(x + 0.5, y + 0.5);
+	glVertex2f(x + width - 0.5, y + 0.5);
+	glVertex2f(x + width - 0.5, y + height - 0.5);
+	glVertex2f(x + 0.5, y + height - 0.5);
+	glVertex2f(x + 0.5, y + 0.5);
 	glEnd();
 }
 
 void drawRoundedRect(float x, float y, float width, float height, float edgeRadius)
 {
-	if (!poloState.isDrawing)
-		return;
-	
 	drawRect(x, y, width, height);
 }
 
 void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
 {
-	if (!poloState.isDrawing)
-		return;
-	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x2 + 0.5, y2 + 0.5);
 	setPoloColor(poloState.fillColor1);
-	glVertex2f(x3, y3);
+	glVertex2f(x3 + 0.5, y3 + 0.5);
 	glEnd();
 
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
-	glVertex2f(x3, y3);
-	glVertex2f(x1, y1);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x2 + 0.5, y2 + 0.5);
+	glVertex2f(x3 + 0.5, y3 + 0.5);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
 	glEnd();
 }
 
 void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
 {
-	if (!poloState.isDrawing)
-		return;
-	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x2 + 0.5, y2 + 0.5);
 	setPoloColor(poloState.fillColor1);
-	glVertex2f(x3, y3);
-	glVertex2f(x4, y4);
+	glVertex2f(x3 + 0.5, y3 + 0.5);
+	glVertex2f(x4 + 0.5, y4 + 0.5);
 	glEnd();
 
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
-	glVertex2f(x3, y3);
-	glVertex2f(x4, y4);
-	glVertex2f(x1, y1);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x2 + 0.5, y2 + 0.5);
+	glVertex2f(x3 + 0.5, y3 + 0.5);
+	glVertex2f(x4 + 0.5, y4 + 0.5);
+	glVertex2f(x1 + 0.5, y1 + 0.5);
 	glEnd();
 }
 
 void drawCircle(float x, float y, float radius)
 {
 	int i;
-	
-	if (!poloState.isDrawing)
-		return;
 	
 	if (radius < 0.001)
 		return;
@@ -467,16 +485,27 @@ void drawCircle(float x, float y, float radius)
 	glVertex2f(x, y);
 	setPoloColor(poloState.fillColor2);
 	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0),
-		           y + radius * sin(i * 2.0 * M_PI / 360.0));
+		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0 + 0.5),
+		           y + radius * sin(i * 2.0 * M_PI / 360.0 + 0.5));
 	glEnd();
 	
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
 	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0),
-		           y + radius * sin(i * 2.0 * M_PI / 360.0));
+		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0 + 0.5),
+		           y + radius * sin(i * 2.0 * M_PI / 360.0 + 0.5));
 	glEnd();
+}
+
+void clearScreen()
+{
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void updateScreen()
+{
+	glutSwapBuffers();
 }
 
 void setTextFont(enum PoloFont font)
@@ -529,38 +558,196 @@ float getTextDrawHeight(char *str)
 
 void drawText(float x, float y, char *str)
 {
-	y += getTextDrawHeight(str);
-	
-	y += 5;
 	y -= glutBitmapHeight(poloState.font);
+	y += getTextDrawHeight(str);
+	// Fix text baseline... this code is actually a bit nasty :-/
+	y += 5;
 	glRasterPos2f(x, y);
-	while(*str)
-	{
-		if (*str == '\n')
-		{
-			y -= glutBitmapHeight(poloState.font);
-			glRasterPos2f(x, y);
-		}
-		else
-			glutBitmapCharacter(poloState.font, *str);
-		
-		str++;
-	}
+	
+	glutBitmapString(poloState.font, str);
+}
+
+static unsigned int getLittleEndianValue(unsigned char *value, int bits)
+{
+	if (bits == 16)
+		return (value[0] << 0) +
+		       (value[1] << 8);
+	else if (bits == 32)
+		return (value[0] << 0) +
+		       (value[1] << 8) +
+		       (value[2] << 16) +
+		       (value[3] << 24);
+	
+	return 0;
+}
+
+static int getNextPowerOf2(int value)
+{
+	value--;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	value++;
+	
+	return value;
+}
+
+static Image getFreeImage()
+{
+	Image i;
+	
+	for (i = 1; i < POLO_MAX_IMAGES; i++)
+		if (!poloState.images[i].texture)
+			return i;
+	
+	return 0;
 }
 
 Image loadImage(char *path)
 {
-	return 0;
-}
-
-void freeImage(Image image)
-{
+	PoloBMPHeader bmpHeader;
+	int pixelsOffset, width, height, numberOfPlanes, bytesPerPixel, compression;
+	int valid = 1;
+	Image image = 0;
+	
+	FILE *fp = fopen(path, "rb");
+	if (!fp)
+		return 0;
+	
+	if (fread(&bmpHeader, sizeof(bmpHeader), 1, fp) != 1)
+		valid = 0;
+	
+	if ((bmpHeader.id[0] != 'B') || (bmpHeader.id[1] != 'M'))
+		valid = 0;
+	
+	pixelsOffset = getLittleEndianValue(bmpHeader.pixelsOffset, 32);
+	width = getLittleEndianValue(bmpHeader.width, 32);
+	height = getLittleEndianValue(bmpHeader.height, 32);
+	numberOfPlanes = getLittleEndianValue(bmpHeader.numberOfPlanes, 16);
+	bytesPerPixel = getLittleEndianValue(bmpHeader.bitsPerPixel, 16) / 8;
+	compression = getLittleEndianValue(bmpHeader.compression, 32);
+	
+	if ((width > 4096) || (height > 4096) || (numberOfPlanes != 1) ||
+	    ((bytesPerPixel != 3) && (bytesPerPixel != 4)) ||
+	    (compression != 0))
+		valid = 0;
+	
+	if (valid)
+	{
+		int textureWidth = getNextPowerOf2(width);
+		int textureHeight = getNextPowerOf2(height);
+		
+		char *p = calloc(textureWidth * textureHeight, bytesPerPixel);
+		int y;
+		
+		if (p)
+		{
+			fseek(fp, pixelsOffset, SEEK_SET);
+			
+			for (y = 0; y < height; y++)
+				fread(&p[y * textureWidth * bytesPerPixel], width * bytesPerPixel, 1, fp);
+				
+			image = getFreeImage();
+			if (image)
+			{
+				PoloImage *poloImage = &poloState.images[image];
+				
+				glGenTextures(1, &(poloImage->texture));
+				
+				glBindTexture(GL_TEXTURE_2D, poloImage->texture);
+				
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+					     textureWidth, textureHeight,
+					     0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
+					     GL_UNSIGNED_BYTE, p);
+				
+				poloImage->textureWidth = textureWidth;
+				poloImage->textureHeight = textureHeight;
+				poloImage->width = width;
+				poloImage->height = height;
+			}
+			
+			free(p);
+		}
+	}
+	
+	fclose(fp);
+	
+	return image;
 }
 
 void drawImage(float x, float y, Image image)
 {
-	if (!poloState.isDrawing)
+	PoloImage *poloImage;
+	float width, height;
+	
+	if (image >= POLO_MAX_IMAGES)
 		return;
+	
+	poloImage = &poloState.images[image];
+	
+	if (!poloImage->texture)
+		return;
+	
+	width = ((float) poloImage->width) / poloImage->textureWidth;
+	height = ((float) poloImage->height) / poloImage->textureHeight;
+
+	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
+	
+	glColor4f(1, 1, 1, 1);
+	
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex2f(x, y);
+	glTexCoord2f(width, 0);
+	glVertex2f(x + poloImage->width, y);
+	glTexCoord2f(width, height);
+	glVertex2f(x + poloImage->width, y + poloImage->height);
+	glTexCoord2f(0, height);
+	glVertex2f(x, y + poloImage->height);
+	glEnd();
+}
+
+void freeImage(Image image)
+{
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	glDeleteTextures(1, &poloState.images[image].texture);
+	
+	poloState.images[image].texture = 0;
+}
+
+// Keyboard
+
+void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key))
+{
+	poloState.keyboardCallback = keyboardCallback;
+}
+
+int getPressedKey()
+{
+	int key = poloState.key;
+	poloState.key = 0;
+	
+	return key;
+}
+
+// Mouse
+
+void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y))
+{
+	poloState.mouseMotionCallback = mouseMotionCallback;
+}
+
+void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int state))
+{
+	poloState.mouseButtonCallback = mouseButtonCallback;
 }
 
 float getMouseX()
@@ -581,32 +768,6 @@ int isMouseButtonPressed(int buttonIndex)
 	return poloState.mouseButtonState[buttonIndex];
 }
 
-int getPressedKey()
-{
-	int key = poloState.key;
-	poloState.key = 0;
-	
-	return key;
-}
-
-void setKeyboardCallback(void *keyCallback(void *userData, int key), void *userData)
-{
-}
-
-void setMouseMotionCallback(void *keyCallback(void *userData, int x, int y), void *userData)
-{
-}
-
-void setMouseButtonCallback(void *keyCallback(void *userData, int button, int state), void *userData)
-{
-
-}
-
-float getRunTime()
-{
-	return glutGet(GLUT_ELAPSED_TIME) * 0.001;
-}
-
 void showMousePointer()
 {
 	glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
@@ -615,5 +776,22 @@ void showMousePointer()
 void hideMousePointer()
 {
 	glutSetCursor(GLUT_CURSOR_NONE);
+}
+
+// Timer
+
+void setTimerCallback(void (*timerCallback)(void *userData, int id))
+{
+	
+}
+
+void runTimer(int id, int milliseconds)
+{
+
+}
+
+float getRunTime()
+{
+	return glutGet(GLUT_ELAPSED_TIME) * 0.001;
 }
 
