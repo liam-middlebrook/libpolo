@@ -19,6 +19,10 @@ void draw(void *userData)
 		drawImage(getMouseX() - getImageWidth(d->image) / 2,
 		          getMouseY() - getImageHeight(d->image) / 2,
 		          d->image);
+	
+	setPenColor(POLO_WHITE);
+	setGradientFillColors(POLO_SILVER, POLO_TUNGSTEN);
+	drawRect(-1, -1, 128, getScreenHeight() + 2);
 }
 
 int main(int argc, char *argv[])
@@ -26,11 +30,10 @@ int main(int argc, char *argv[])
 	DemoData demoData;
 	
 	initPolo(640, 480, 0, "Mouse Painter");
+	
 	setPoloUserData(&demoData);
-	
 	setDrawCallback(draw);
-	
-	setImageAlpha(0.1);	
+	setImageAlpha(0.1);
 	demoData.image = loadImage("brush.bmp");
 	
 	runPolo();
