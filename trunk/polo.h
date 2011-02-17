@@ -146,7 +146,7 @@ enum PoloFont
 
 // Initialization & exit
 void setPoloUserData(void *userData);
-void initPolo(int width, int height, int fullscreen, char *windowTitle);
+void initPolo(int width, int height, int fullscreen, const char *windowTitle);
 void runPolo();
 void exitPolo();
 
@@ -174,11 +174,11 @@ int getScreenWidth();
 int getScreenHeight();
 
 void setTextFont(enum PoloFont font);
-float getTextDrawWidth(char *str);
-float getTextDrawHeight(char *str);
-void drawText(float x, float y, char *str);
+float getTextDrawWidth(const unsigned char *str);
+float getTextDrawHeight(const unsigned char *str);
+void drawText(float x, float y, const unsigned char *str);
 
-Image loadImage(char *path);
+Image loadImage(const char *path);
 int getImageWidth(Image image);
 int getImageHeight(Image image);
 void drawImage(float x, float y, Image image);

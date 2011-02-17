@@ -50,7 +50,7 @@
 
 typedef struct
 {
-	int texture;
+	GLuint texture;
 	int textureWidth;
 	int textureHeight;
 	int width;
@@ -255,10 +255,10 @@ void setPoloUserData(void *userData)
 	poloState.userData = userData;
 }
 
-void initPolo(int width, int height, int fullscreen, char *windowTitle)
+void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 {
 	int argc = 1;
-	char *argv[2] = {"polo", NULL};
+	const char *argv[2] = {"polo", NULL};
 	
 	if (poloState.isInitialized)
 		return;
@@ -270,7 +270,7 @@ void initPolo(int width, int height, int fullscreen, char *windowTitle)
 	setTextFont(POLO_HELVETICA_18);
 	
 	// Init glut
-	glutInit(&argc, argv);
+	glutInit(&argc, (char **)argv);
 	
 	glutInitWindowSize(width, height);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -629,20 +629,20 @@ void setTextFont(enum PoloFont font)
 	}
 }
 
-float getTextDrawWidth(char *str)
+float getTextDrawWidth(const unsigned char *str)
 {
 	if (!poloState.isInitialized)
-		return;
+		return 0;
 	
 	return glutBitmapLength(poloState.font, str);
 }
 
-float getTextDrawHeight(char *str)
+float getTextDrawHeight(const unsigned char *str)
 {
 	int i = 1;
 
 	if (!poloState.isInitialized)
-		return;
+		return 0;
 	
 	while (*str)
 	{
@@ -655,7 +655,7 @@ float getTextDrawHeight(char *str)
 	return i * glutBitmapHeight(poloState.font);
 }
 
-void drawText(float x, float y, char *str)
+void drawText(float x, float y, const unsigned char *str)
 {
 	if (!poloState.isInitialized)
 		return;
@@ -707,7 +707,7 @@ static Image getFreeImage()
 	return 0;
 }
 
-Image loadImage(char *path)
+Image loadImage(const char *path)
 {
 	PoloBMPHeader bmpHeader;
 	int pixelsOffset, width, height, numberOfPlanes, bytesPerPixel, compression;
@@ -745,7 +745,7 @@ Image loadImage(char *path)
 		int textureWidth = getNextPowerOf2(width);
 		int textureHeight = getNextPowerOf2(height);
 		
-		char *p = calloc(textureWidth * textureHeight, bytesPerPixel);
+		char *p = (char *)calloc(textureWidth * textureHeight, bytesPerPixel);
 		int y;
 		
 		if (p)
