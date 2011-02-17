@@ -62,7 +62,6 @@ typedef struct
 	int isInitialized;
 	void *userData;
 	void (*drawCallback)(void *userData);
-	void (*resizeCallback)(void *userData, int width, int height);
 	void (*keyboardCallback)(void *userData, int key);
 	void (*mouseMotionCallback)(void *userData, int x, int y);
 	void (*mouseButtonCallback)(void *userData, int button, int state);
@@ -129,9 +128,6 @@ static void resizeCallback(int width, int height)
 	glViewport(0, 0, width, height);
 	clearScreen();
 	updateScreen();
-	
-	if (poloState.resizeCallback)
-		poloState.resizeCallback(poloState.userData, width, height);
 }
 
 static void keyboardCallback(unsigned char key, int x, int y)
@@ -272,11 +268,14 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	// Init glut
 	glutInit(&argc, (char **)argv);
 	
+	// Create glut window
 	glutInitWindowSize(width, height);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutCreateWindow(windowTitle);
 	if (fullscreen)
 		glutFullScreen();
+	
+	poloState.isInitialized = 1;
 	
 	// Init run time (so it starts at 0 on all systems)
 	getRunTime();
@@ -295,7 +294,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 #endif
 	
-	// Set OpenGL options
+	// Configure OpenGL
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -598,6 +597,16 @@ void updateScreen()
 		return;
 	
 	glutSwapBuffers();
+}
+
+int getScreenWidth()
+{
+	return glutGet(GLUT_WINDOW_WIDTH);
+}
+
+int getScreenHeight()
+{
+	return glutGet(GLUT_WINDOW_HEIGHT);
 }
 
 void setTextFont(enum PoloFont font)
