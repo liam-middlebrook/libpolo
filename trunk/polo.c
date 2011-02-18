@@ -72,6 +72,8 @@ typedef struct
 	float imageAlpha;
 	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
+	float fontHeight;
+	float fontBaseLine;
 	int key;
 	float mouseX;
 	float mouseY;
@@ -615,38 +617,67 @@ void setTextFont(enum PoloFont font)
 	{
 		case POLO_COURIER_13:
 			poloState.font = GLUT_BITMAP_8_BY_13;
+			poloState.fontHeight = 14;
+			poloState.fontBaseLine = 3;
 			break;
 		case POLO_COURIER_15:
 			poloState.font = GLUT_BITMAP_9_BY_15;
+			poloState.fontHeight = 16;
+			poloState.fontBaseLine = 4;
 			break;
 		case POLO_TIMES_10:
 			poloState.font = GLUT_BITMAP_TIMES_ROMAN_10;
+			poloState.fontHeight = 14;
+			poloState.fontBaseLine = 4;
 			break;
 		case POLO_TIMES_24:
 			poloState.font = GLUT_BITMAP_TIMES_ROMAN_24;
+			poloState.fontHeight = 29;
+			poloState.fontBaseLine = 7;
 			break;
 		case POLO_HELVETICA_10:
 			poloState.font = GLUT_BITMAP_HELVETICA_10;
+			poloState.fontHeight = 14;
+			poloState.fontBaseLine = 3;
 			break;
 		case POLO_HELVETICA_12:
 			poloState.font = GLUT_BITMAP_HELVETICA_12;
+			poloState.fontHeight = 16;
+			poloState.fontBaseLine = 4;
 			break;
 		case POLO_HELVETICA_18:
 		default:
 			poloState.font = GLUT_BITMAP_HELVETICA_18;
+			poloState.fontHeight = 23;
+			poloState.fontBaseLine = 5;
 			break;
 	}
 }
 
-float getTextDrawWidth(const unsigned char *str)
+float getTextDrawWidth(const char *str)
 {
+	float maxLength = 0, currentLength = 0;
+	
 	if (!poloState.isInitialized)
 		return 0;
 	
-	return glutBitmapLength(poloState.font, str);
+	while(*str)
+	{
+		if(*str == '\n')
+			currentLength = 0;
+		else
+			currentLength += glutBitmapWidth(poloState.font, *str);
+		
+		if(maxLength < currentLength)
+			maxLength = currentLength;
+		
+		str++;
+	}
+	
+	return maxLength;
 }
 
-float getTextDrawHeight(const unsigned char *str)
+float getTextDrawHeight(const char *str)
 {
 	int i = 1;
 
@@ -661,21 +692,29 @@ float getTextDrawHeight(const unsigned char *str)
 		str++;
 	}
 	
-	return i * glutBitmapHeight(poloState.font);
+	return i * poloState.fontHeight;
 }
 
-void drawText(float x, float y, const unsigned char *str)
+void drawText(float x, float y, const char *str)
 {
-	if (!poloState.isInitialized)
-		return;
-	
-	y -= glutBitmapHeight(poloState.font);
 	y += getTextDrawHeight(str);
-	// Fix text baseline... this code is actually a bit nasty :-/
-	y += 5;
-	glRasterPos2f(x, y);
+	y += poloState.fontBaseLine;
+	y -= poloState.fontHeight;
 	
-	glutBitmapString(poloState.font, str);
+	setPoloColor(poloState.penColor);
+	glRasterPos2f(x, y);
+	while(*str)
+	{
+		if (*str == '\n')
+		{
+			y -= poloState.fontHeight;
+			glRasterPos2f(x, y);
+		}
+		else
+			glutBitmapCharacter(poloState.font, *str);
+		
+		str++;
+	}
 }
 
 static unsigned int getLittleEndianValue(unsigned char *value, int bits)
@@ -759,11 +798,13 @@ Image loadImage(const char *path)
 		
 		if (p)
 		{
+			size_t bytesRead;
+			
 			fseek(fp, pixelsOffset, SEEK_SET);
 			
 			// Read line by line from image
 			for (y = 0; y < height; y++)
-				fread(&p[y * textureWidth * bytesPerPixel], width * bytesPerPixel, 1, fp);
+				bytesRead = fread(&p[y * textureWidth * bytesPerPixel], width * bytesPerPixel, 1, fp);
 			
 			image = getFreeImage();
 			if (image)

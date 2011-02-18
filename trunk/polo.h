@@ -173,9 +173,9 @@ int getScreenWidth();
 int getScreenHeight();
 
 void setTextFont(enum PoloFont font);
-float getTextDrawWidth(const unsigned char *str);
-float getTextDrawHeight(const unsigned char *str);
-void drawText(float x, float y, const unsigned char *str);
+float getTextDrawWidth(const char *str);
+float getTextDrawHeight(const char *str);
+void drawText(float x, float y, const char *str);
 
 Image loadImage(const char *path);
 int getImageWidth(Image image);
