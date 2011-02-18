@@ -19,6 +19,7 @@
 // #define USE_FREEGLUT
 
 #ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #ifdef USE_FREEGLUT
 #include <GLUT/freeglut.h>
@@ -69,7 +70,7 @@ typedef struct
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
-	float imageAlpha;
+	Color imageTint;
 	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
 	float fontHeight;
@@ -260,7 +261,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	// Init state
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
-	setImageAlpha(1.0);
+	setImageTint(POLO_WHITE);
 	setTextFont(POLO_HELVETICA_18);
 	
 	// Init glut
@@ -268,7 +269,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 	// Create glut window
 	glutInitWindowSize(width, height);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
 	glutCreateWindow(windowTitle);
 	if (fullscreen)
 		glutFullScreen();
@@ -291,6 +292,17 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 #endif
+	
+#ifdef __WINDOWS__
+	wglSwapInterval(1);
+#endif
+	
+#ifdef __APPLE__
+	{
+		const GLint sync = 1;
+		CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &sync);
+	}
+#endif // __APPLE__
 	
 	// Configure OpenGL
 	glEnable(GL_BLEND);
@@ -341,19 +353,25 @@ static float saturate(float value)
 	return value;
 }
 
-Color getColorFromRGB(float red, float green, float blue)
+Color getColorFromRGBA(float red, float green, float blue, float alpha)
 {
 	float r = saturate(red);
 	float g = saturate(green);
 	float b = saturate(blue);
+	float a = saturate(alpha);
 	
 	return ((((int)(r * 255.0)) << 24) +
 	        (((int)(g * 255.0)) << 16) +
 	        (((int)(b * 255.0)) << 8) +
-	        0xff);
+	        (((int)(a * 255.0)) << 0));
 }
 
-Color getColorFromHSV(float hue, float saturation, float value)
+Color getColorFromRGB(float red, float green, float blue)
+{
+	return getColorFromRGBA(red, green, blue, 1.0);
+}
+
+Color getColorFromHSVA(float hue, float saturation, float value, float alpha)
 {
 	float r, g, b;
 	
@@ -418,7 +436,12 @@ Color getColorFromHSV(float hue, float saturation, float value)
 		}
 	}
 	
-	return getColorFromRGB(r, g, b);
+	return getColorFromRGBA(r, g, b, alpha);
+}
+
+Color getColorFromHSV(float hue, float saturation, float value)
+{
+	return getColorFromHSVA(hue, saturation, value, 1.0);
 }
 
 void setPenColor(Color color)
@@ -465,6 +488,9 @@ void drawLine(float x1, float y1, float x2, float y2)
 	if (!poloState.isInitialized)
 		return;
 	
+	x2 += (x2 < x1) ? -1.0 : 1.0;
+	y2 += (y2 < y1) ? -1.0 : 1.0;
+	
 	glBegin(GL_LINES);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x1 + 0.5, y1 + 0.5);
@@ -489,13 +515,12 @@ void drawRect(float x, float y, float width, float height)
 	glVertex2f(x, y + height);
 	glEnd();
 	
-	glBegin(GL_LINE_STRIP);
+	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x + 0.5, y + 0.5);
 	glVertex2f(x + width - 0.5, y + 0.5);
 	glVertex2f(x + width - 0.5, y + height - 0.5);
 	glVertex2f(x + 0.5, y + height - 0.5);
-	glVertex2f(x + 0.5, y + 0.5);
 	glEnd();
 }
 
@@ -517,25 +542,46 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 		edgeRadius = maxEdgeRadius;
 	
 	glBegin(GL_QUAD_STRIP);
-	for(i = 0; i <= 90; i++)
+	for(i = 0; i <= 180; i++)
 	{
-		float xr = x + edgeRadius * (1.0 - cos(i * 2.0 * M_PI / 360.0));
-		float y1 = y + edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
-		float y2 = y + height - edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
+		float phase = i * 2.0 * M_PI / 360.0;
+		float xr = edgeRadius * cos(phase);
+		float yr = edgeRadius * sin(phase);
+		float xp, yp1, yp2;
+		
+		if (i < 90)
+			xp = x + edgeRadius - xr;
+		else
+			xp = x + width - edgeRadius - xr;
+		yp1 = y - yr + edgeRadius;
+		yp2 = y + height + yr - edgeRadius;
+		
 		setPoloColor(poloState.fillColor2);
-		glVertex2f(xr + 0.5, y1 + 0.5);
+		glVertex2f(xp, yp1);
 		setPoloColor(poloState.fillColor1);
-		glVertex2f(xr + 0.5, y2 + 0.5);
+		glVertex2f(xp, yp2);
 	}
-	for(i = 90; i <= 180; i++)
+	glEnd();
+	
+	glBegin(GL_LINE_LOOP);
+	setPoloColor(poloState.penColor);
+	for(i = 0; i < 360; i++)
 	{
-		float xr = x + width + edgeRadius * (-1.0 - cos(i * 2.0 * M_PI / 360.0));
-		float y1 = y + edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
-		float y2 = y + height - edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
-		setPoloColor(poloState.fillColor2);
-		glVertex2f(xr + 0.5, y1 + 0.5);
-		setPoloColor(poloState.fillColor1);
-		glVertex2f(xr + 0.5, y2 + 0.5);
+		float phase = i * 2.0 * M_PI / 360.0;
+		float xr = edgeRadius * cos(phase);
+		float yr = edgeRadius * sin(phase);
+		float xp, yp;
+		
+		if ((i < 90) || (i >= 270))
+			xp = xr + x + width - edgeRadius - 0.5;
+		else
+			xp = xr + x + edgeRadius + 0.5;
+		if (i <= 180)
+			yp = yr + y + height - edgeRadius - 0.5;
+		else
+			yp = yr + y + edgeRadius + 0.5;
+		
+		glVertex2f(xp, yp);
 	}
 	glEnd();
 }
@@ -547,18 +593,17 @@ void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
 	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
-	glVertex2f(x2 + 0.5, y2 + 0.5);
+	glVertex2f(x1, y1);
+	glVertex2f(x2, y2);
 	setPoloColor(poloState.fillColor1);
-	glVertex2f(x3 + 0.5, y3 + 0.5);
+	glVertex2f(x3, y3);
 	glEnd();
 	
-	glBegin(GL_LINE_STRIP);
+	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
-	glVertex2f(x2 + 0.5, y2 + 0.5);
-	glVertex2f(x3 + 0.5, y3 + 0.5);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x1, y1);
+	glVertex2f(x2, y2);
+	glVertex2f(x3, y3);
 	glEnd();
 }
 
@@ -569,20 +614,19 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
-	glVertex2f(x2 + 0.5, y2 + 0.5);
+	glVertex2f(x1, y1);
+	glVertex2f(x2, y2);
 	setPoloColor(poloState.fillColor1);
-	glVertex2f(x3 + 0.5, y3 + 0.5);
-	glVertex2f(x4 + 0.5, y4 + 0.5);
+	glVertex2f(x3, y3);
+	glVertex2f(x4, y4);
 	glEnd();
 	
-	glBegin(GL_LINE_STRIP);
+	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
-	glVertex2f(x2 + 0.5, y2 + 0.5);
-	glVertex2f(x3 + 0.5, y3 + 0.5);
-	glVertex2f(x4 + 0.5, y4 + 0.5);
-	glVertex2f(x1 + 0.5, y1 + 0.5);
+	glVertex2f(x1, y1);
+	glVertex2f(x2, y2);
+	glVertex2f(x3, y3);
+	glVertex2f(x4, y4);
 	glEnd();
 }
 
@@ -601,13 +645,13 @@ void drawCircle(float x, float y, float radius)
 	glVertex2f(x, y);
 	setPoloColor(poloState.fillColor2);
 	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
-		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
+		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0),
+		           y + radius * sin(i * 2.0 * M_PI / 360.0));
 	glEnd();
 	
-	glBegin(GL_LINE_STRIP);
+	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
-	for(i = 0; i <= 360;i++)
+	for(i = 0; i < 360;i++)
 		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
 		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
 	glEnd();
@@ -818,7 +862,7 @@ Image loadImage(const char *path)
 	
 	if (valid)
 	{
-		// OpenGL requires textures of size 2^m, 2^n
+		// OpenGL requires a textures of size 2^m, 2^n
 		int textureWidth = getNextPowerOf2(width);
 		int textureHeight = getNextPowerOf2(height);
 		
@@ -885,9 +929,9 @@ int getImageHeight(Image image)
 	return poloState.images[image].height;
 }
 
-void setImageAlpha(float alpha)
+void setImageTint(Color color)
 {
-	poloState.imageAlpha = alpha;
+	poloState.imageTint = color;
 }
 
 void drawImage(float x, float y, Image image)
@@ -911,7 +955,7 @@ void drawImage(float x, float y, Image image)
 	
 	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 	
-	glColor4f(1, 1, 1, poloState.imageAlpha);
+	setPoloColor(poloState.imageTint);
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
