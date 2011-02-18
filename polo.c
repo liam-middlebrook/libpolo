@@ -106,8 +106,6 @@ static PoloState poloState;
 // Private callbacks
 static void drawCallback()
 {
-	// Draw stored texture
-	
 	if (poloState.drawCallback)
 	{
 		glMatrixMode(GL_PROJECTION);
@@ -119,8 +117,6 @@ static void drawCallback()
 		
 		poloState.drawCallback(poloState.userData);
 	}
-	
-	// Recover current output
 	
 	updateScreen();
 }
@@ -280,7 +276,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	poloState.isInitialized = 1;
 	
 	// Init run time (so it starts at 0 on all systems)
-	getRunTime();
+	getTime();
 	
 	// Set internal callbacks
 	glutDisplayFunc(drawCallback);
@@ -492,7 +488,7 @@ void drawRect(float x, float y, float width, float height)
 	glVertex2f(x + width, y + height);
 	glVertex2f(x, y + height);
 	glEnd();
-
+	
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x + 0.5, y + 0.5);
@@ -505,10 +501,43 @@ void drawRect(float x, float y, float width, float height)
 
 void drawRoundedRect(float x, float y, float width, float height, float edgeRadius)
 {
+	float maxEdgeRadius;
+	int i;
+	
 	if (!poloState.isInitialized)
 		return;
 	
-	drawRect(x, y, width, height);
+	if ((width < 0) || (height < 0))
+		return;
+	
+	maxEdgeRadius = (width < height) ? width / 2.0 : height / 2.0;
+	if (edgeRadius < 0)
+		edgeRadius = 0;
+	if (edgeRadius > maxEdgeRadius)
+		edgeRadius = maxEdgeRadius;
+	
+	glBegin(GL_QUAD_STRIP);
+	for(i = 0; i <= 90; i++)
+	{
+		float xr = x + edgeRadius * (1.0 - cos(i * 2.0 * M_PI / 360.0));
+		float y1 = y + edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
+		float y2 = y + height - edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
+		setPoloColor(poloState.fillColor2);
+		glVertex2f(xr + 0.5, y1 + 0.5);
+		setPoloColor(poloState.fillColor1);
+		glVertex2f(xr + 0.5, y2 + 0.5);
+	}
+	for(i = 90; i <= 180; i++)
+	{
+		float xr = x + width + edgeRadius * (-1.0 - cos(i * 2.0 * M_PI / 360.0));
+		float y1 = y + edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
+		float y2 = y + height - edgeRadius * (1.0 - sin(i * 2.0 * M_PI / 360.0));
+		setPoloColor(poloState.fillColor2);
+		glVertex2f(xr + 0.5, y1 + 0.5);
+		setPoloColor(poloState.fillColor1);
+		glVertex2f(xr + 0.5, y2 + 0.5);
+	}
+	glEnd();
 }
 
 void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
@@ -523,7 +552,7 @@ void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
 	setPoloColor(poloState.fillColor1);
 	glVertex2f(x3 + 0.5, y3 + 0.5);
 	glEnd();
-
+	
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x1 + 0.5, y1 + 0.5);
@@ -546,7 +575,7 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 	glVertex2f(x3 + 0.5, y3 + 0.5);
 	glVertex2f(x4 + 0.5, y4 + 0.5);
 	glEnd();
-
+	
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x1 + 0.5, y1 + 0.5);
@@ -572,15 +601,15 @@ void drawCircle(float x, float y, float radius)
 	glVertex2f(x, y);
 	setPoloColor(poloState.fillColor2);
 	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0 + 0.5),
-		           y + radius * sin(i * 2.0 * M_PI / 360.0 + 0.5));
+		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
+		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
 	glEnd();
 	
 	glBegin(GL_LINE_STRIP);
 	setPoloColor(poloState.penColor);
 	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0 + 0.5),
-		           y + radius * sin(i * 2.0 * M_PI / 360.0 + 0.5));
+		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
+		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
 	glEnd();
 }
 
@@ -993,7 +1022,7 @@ void runTimer(int id, int milliseconds)
 	glutTimerFunc(milliseconds, timerCallback, id);
 }
 
-float getRunTime()
+float getTime()
 {
 	if (!poloState.isInitialized)
 		return 0;
