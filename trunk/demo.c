@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
 {
 	DemoData demoData;
 	
-	initPolo(640, 480, 1, "Mouse Painter");
+	initPolo(640, 480, 0, "Mouse Painter");
 	
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
-	setImageAlpha(0.1);
+	setImageTint(getColorFromRGBA(1, 1, 1, 0.1));
 	demoData.image = loadImage("demo.bmp");
 	
 	runPolo();

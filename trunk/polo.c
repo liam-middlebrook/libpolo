@@ -70,7 +70,7 @@ typedef struct
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
-	float imageAlpha;
+	Color imageTint;
 	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
 	float fontHeight;
@@ -262,7 +262,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	// Init state
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
-	setImageAlpha(1.0);
+	setImageTint(POLO_WHITE);
 	setTextFont(POLO_HELVETICA_18);
 	
 	// Init glut
@@ -289,7 +289,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
-		
+	
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 #endif
@@ -304,10 +304,6 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 		CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &sync);
 	}
 #endif // __APPLE__
-	
-#ifdef GLX_VERSION_1_1
-//	glXSwapIntervalSGI(1);
-#endif // GLEE_GLX_SGI_swap_control
 	
 	// Configure OpenGL
 	glEnable(GL_BLEND);
@@ -934,9 +930,9 @@ int getImageHeight(Image image)
 	return poloState.images[image].height;
 }
 
-void setImageAlpha(float alpha)
+void setImageTint(Color color)
 {
-	poloState.imageAlpha = alpha;
+	poloState.imageTint = color;
 }
 
 void drawImage(float x, float y, Image image)
@@ -960,7 +956,7 @@ void drawImage(float x, float y, Image image)
 	
 	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 	
-	glColor4f(1.0, 1.0, 1.0, poloState.imageAlpha);
+	setPoloColor(poloState.imageTint);
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
