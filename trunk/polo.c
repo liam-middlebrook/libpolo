@@ -70,7 +70,7 @@ typedef struct
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
-	Color imageTint;
+	float imageAlpha;
 	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
 	float fontHeight;
@@ -253,6 +253,7 @@ void setPoloUserData(void *userData)
 void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 {
 	int argc = 1;
+	int value;
 	const char *argv[2] = {"polo", NULL};
 	
 	if (poloState.isInitialized)
@@ -261,7 +262,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	// Init state
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
-	setImageTint(POLO_WHITE);
+	setImageAlpha(1.0);
 	setTextFont(POLO_HELVETICA_18);
 	
 	// Init glut
@@ -269,7 +270,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 	// Create glut window
 	glutInitWindowSize(width, height);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutCreateWindow(windowTitle);
 	if (fullscreen)
 		glutFullScreen();
@@ -288,7 +289,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
-	
+		
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 #endif
@@ -303,6 +304,10 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 		CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &sync);
 	}
 #endif // __APPLE__
+	
+#ifdef GLX_VERSION_1_1
+//	glXSwapIntervalSGI(1);
+#endif // GLEE_GLX_SGI_swap_control
 	
 	// Configure OpenGL
 	glEnable(GL_BLEND);
@@ -929,9 +934,9 @@ int getImageHeight(Image image)
 	return poloState.images[image].height;
 }
 
-void setImageTint(Color color)
+void setImageAlpha(float alpha)
 {
-	poloState.imageTint = color;
+	poloState.imageAlpha = alpha;
 }
 
 void drawImage(float x, float y, Image image)
@@ -955,7 +960,7 @@ void drawImage(float x, float y, Image image)
 	
 	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 	
-	setPoloColor(poloState.imageTint);
+	glColor4f(1.0, 1.0, 1.0, poloState.imageAlpha);
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);

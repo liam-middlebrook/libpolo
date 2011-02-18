@@ -182,7 +182,7 @@ void drawText(float x, float y, const char *str);
 Image loadImage(const char *path);
 int getImageWidth(Image image);
 int getImageHeight(Image image);
-void setImageTint(Color color);
+void setImageAlpha(float alpha);
 void drawImage(float x, float y, Image image);
 void freeImage(Image image);
 
