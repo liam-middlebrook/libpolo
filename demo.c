@@ -9,6 +9,7 @@ typedef struct
 void draw(void *userData)
 {
 	DemoData *d = (DemoData *) userData;
+	const char *text = "Paleta de\n Colores";
 	
 	if (getKey() == 27)
 		exitPolo();
@@ -23,6 +24,11 @@ void draw(void *userData)
 	setPenColor(POLO_WHITE);
 	setGradientFillColors(POLO_SILVER, POLO_TUNGSTEN);
 	drawRect(-1, -1, 128, getScreenHeight() + 2);
+	
+	setPenColor(POLO_BLACK);
+	drawText( (128-getTextDrawWidth(text))/2,
+	          getScreenHeight()-getTextDrawHeight(text)-10,
+	          text );
 }
 
 int main(int argc, char *argv[])
