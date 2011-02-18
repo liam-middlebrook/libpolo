@@ -201,7 +201,7 @@ void hideMousePointer();
 // Time
 void setTimerCallback(void (*timerCallback)(void *userData, int id));
 void runTimer(int id, int milliseconds);
-float getRunTime();
+float getTime();
 
 #ifdef __cplusplus
 }

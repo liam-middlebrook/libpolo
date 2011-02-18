@@ -14,16 +14,17 @@ void draw(void *userData)
 	if (getKey() == 27)
 		exitPolo();
 	
-	if (isMouseButtonPressed(1))
+/*	if (isMouseButtonPressed(1))
 		clearScreen();
 	if (isMouseButtonPressed(0))
 		drawImage(getMouseX() - getImageWidth(d->image) / 2,
 		          getMouseY() - getImageHeight(d->image) / 2,
 		          d->image);
-	
-	setPenColor(POLO_WHITE);
+*/	
+	setPenColor(POLO_TUNGSTEN);
 	setGradientFillColors(POLO_SILVER, POLO_TUNGSTEN);
-	drawRect(-1, -1, 128, getScreenHeight() + 2);
+//	drawRect(-1, -1, 128, getScreenHeight() + 2);
+	drawRoundedRect(0, 0, getScreenWidth(), getScreenHeight(), 4000);
 	
 	setPenColor(POLO_BLACK);
 	drawText( (128-getTextDrawWidth(text))/2,
