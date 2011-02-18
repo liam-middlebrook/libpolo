@@ -41,6 +41,9 @@
  *
  */
 
+#ifndef _LIBPOLO_H
+#define _LIBPOLO_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -184,6 +187,7 @@ int getImageWidth(Image image);
 int getImageHeight(Image image);
 void setImageTint(Color color);
 void drawImage(float x, float y, Image image);
+void drawImageQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, Image image);
 void freeImage(Image image);
 
 // Keyboard
@@ -209,3 +213,4 @@ float getTime();
 }
 #endif
 
+#endif // _LIBPOLO_H

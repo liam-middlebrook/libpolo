@@ -935,8 +935,7 @@ void setImageTint(Color color)
 	poloState.imageTint = color;
 }
 
-void drawImage(float x, float y, Image image)
-{
+void drawImageQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, Image image){
 	PoloImage *poloImage;
 	float width, height;
 	
@@ -960,16 +959,35 @@ void drawImage(float x, float y, Image image)
 	
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
-	glVertex2f(x, y);
+	glVertex2f(x1, y1);
 	glTexCoord2f(width, 0);
-	glVertex2f(x + poloImage->width, y);
+	glVertex2f(x2, y2);
 	glTexCoord2f(width, height);
-	glVertex2f(x + poloImage->width, y + poloImage->height);
+	glVertex2f(x3, y3);
 	glTexCoord2f(0, height);
-	glVertex2f(x, y + poloImage->height);
+	glVertex2f(x4, y4);
 	glEnd();
 	
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);	
+}
+
+void drawImage(float x, float y, Image image)
+{
+	PoloImage *poloImage;
+	
+	if (!poloState.isInitialized)
+		return;
+	
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	poloImage = &poloState.images[image];
+	
+	drawImageQuad( x, y,
+	               x + poloImage->width, y,
+	               x + poloImage->width, y + poloImage->height,
+	               x, y + poloImage->height,
+	               image);
 }
 
 void freeImage(Image image)
