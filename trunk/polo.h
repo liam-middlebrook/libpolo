@@ -18,11 +18,11 @@
  *
  * Drawing:
  * - The coordinate system (0, 0) is at the lower left.
- * - Color components (RGB, HSV, HSB) are in the range 0.0 to 1.0.
+ * - Color components (RGB, HSV) are in the range 0.0 to 1.0.
  * - Alpha is the level of opacity.
  * - Images must be in uncompressed BMP format, using either
  *   24-bit RGB or 32-bit RGBA (for alpha transparency).
- * - Images can only be used after Polo was initialized.
+ * - Images can only be used after initPolo was called.
  * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
  *   This reference is 0 if the image could not be loaded.
  * - Use drawImage() to draw an image to screen.
@@ -153,7 +153,9 @@ void exitPolo();
 // Drawing
 void setDrawCallback(void (*drawCallback)(void *userData));
 
+Color getColorFromRGBA(float red, float green, float blue, float alpha);
 Color getColorFromRGB(float red, float green, float blue);
+Color getColorFromHSVA(float hue, float saturation, float value, float alpha);
 Color getColorFromHSV(float hue, float saturation, float value);
 
 void setPenColor(Color color);
@@ -180,8 +182,8 @@ void drawText(float x, float y, const char *str);
 Image loadImage(const char *path);
 int getImageWidth(Image image);
 int getImageHeight(Image image);
+void setImageTint(Color color);
 void drawImage(float x, float y, Image image);
-void setImageAlpha(float alpha);
 void freeImage(Image image);
 
 // Keyboard
