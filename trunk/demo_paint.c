@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 	/* Init variables */
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
-	demoData.brush = loadImage("demo.bmp");
+	demoData.brush = loadImage("wood.bmp");
 	demoData.frame = 0;
 	
 	/* Run polo */
