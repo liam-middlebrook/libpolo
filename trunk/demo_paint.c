@@ -26,32 +26,32 @@ void draw(void *userData)
 	DemoData *d = (DemoData *) userData;
 	char buf[256];
 	
-	// Exit when ESC is pressed
+	/* Exit when ESC is pressed */
 	if (getKey() == 27)
 		exitPolo();
 	
-	// Clear screen with right mouse button
+	/* Clear screen with right mouse button */
 	if (isMouseButtonPressed(1))
 		clearScreen();
-	// Paint with left mouse button
+	/* Paint with left mouse button */
 	if (isMouseButtonPressed(0))
 		drawImage(getMouseX() - getImageWidth(d->brush) / 2,
 				  getMouseY() - getImageHeight(d->brush) / 2,
 				  d->brush, getColorFromRGBA(1, 1, 1, 0.1));
 	
-	// Draw left bar
+	/* Draw left bar */
 	setPenColor(POLO_STEEL);
 	setFillGradient(POLO_SILVER, POLO_TUNGSTEN);
 	drawRect(-1, -1, TOOLBAR_WIDTH, getScreenHeight() + 2);
 	
-	// Draw frames per second and time display
+	/* Draw frames per second and time display */
 	setPenColor(POLO_BLACK);
 	sprintf(buf, "FPS: %.3f", d->frame / (getTime() + 0.001));
 	drawText((TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
 			 getScreenHeight() - getTextDrawHeight(buf) - 10,
 	         buf);
 	
-	// Increment frame number
+	/* Increment frame number */
 	d->frame++;
 }
 
@@ -59,15 +59,15 @@ int main(int argc, char *argv[])
 {
 	DemoData demoData;
 	
-	// Init polo
+	/* Init polo */
 	initPolo(640, 480, 0, "Mouse Painter");
 	
-	// Init our variables
+	/* Init variables */
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
-	demoData.brush = loadImage("brush.bmp");
+	demoData.brush = loadImage("demo.bmp");
 	demoData.frame = 0;
 	
-	// Run polo
+	/* Run polo */
 	runPolo();
 }
