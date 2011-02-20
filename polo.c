@@ -18,21 +18,6 @@
 
 #include "polo.h"
 
-/* #define USE_FREEGLUT */
-
-#ifdef __APPLE__
-#include <OpenGL/OpenGL.h>
-#include <GLUT/glut.h>
-#ifdef USE_FREEGLUT
-#include <GLUT/freeglut.h>
-#endif /* USE_FREEGLUT */
-#else
-#include <GL/glut.h>
-#ifdef USE_FREEGLUT 
-#include <GL/freeglut.h>
-#endif /* USE_FREEGLUT */
-#endif /* __APPLE__ */
-
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
 #endif /* M_PI */
@@ -108,17 +93,17 @@ static PoloState poloState;
 /* Private callbacks */
 static void drawCallback()
 {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glTranslatef(-1.0, -1.0, 0.0);
+	glScalef(2.0 / glutGet(GLUT_WINDOW_WIDTH),
+			 2.0 / glutGet(GLUT_WINDOW_HEIGHT),
+			 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
 	if (poloState.drawCallback)
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glTranslatef(-1.0, -1.0, 0.0);
-		glScalef(2.0 / glutGet(GLUT_WINDOW_WIDTH),
-		         2.0 / glutGet(GLUT_WINDOW_HEIGHT),
-		         1.0);
-		
 		poloState.drawCallback(poloState.userData);
-	}
 	
 	updateScreen();
 }
@@ -269,7 +254,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutInit(&argc, (char **)argv);
 	
 	/* Create glut window */
-	displayMode = GLUT_RGBA | GLUT_DEPTH;
+	displayMode = GLUT_RGB | GLUT_DEPTH;
 #ifndef __APPLE__
 	displayMode |= GLUT_DOUBLE;
 #endif /* __APPLE__ */
@@ -659,7 +644,7 @@ void clearScreen()
 		return;
 	
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void updateScreen()
@@ -851,16 +836,17 @@ Image loadImage(const char *path)
 	bytesPerPixel = getLittleEndianValue(bmpHeader.bitsPerPixel, 16) / 8;
 	compression = getLittleEndianValue(bmpHeader.compression, 32);
 	
-	if ((width > 4096) || (height > 4096) || (numberOfPlanes != 1) ||
-	    ((bytesPerPixel != 3) && (bytesPerPixel != 4)) ||
+	if ((width > 4096) || (height > 4096) || (height < -4096) ||
+		(numberOfPlanes != 1) ||
+		((bytesPerPixel != 3) && (bytesPerPixel != 4)) ||
 	    (compression != 0))
 		valid = 0;
 	
 	if (valid)
 	{
-		// OpenGL requires a textures of size 2^m, 2^n
+		// OpenGL requires a textures of size 2 ^ m, 2 ^ n
 		int textureWidth = getNextPowerOf2(width);
-		int textureHeight = getNextPowerOf2(height);
+		int textureHeight = getNextPowerOf2(abs(height));
 		
 		char *p = (char *)calloc(textureWidth * textureHeight, bytesPerPixel);
 		int y;
@@ -872,9 +858,15 @@ Image loadImage(const char *path)
 			fseek(fp, pixelsOffset, SEEK_SET);
 			
 			// Read line by line from image
-			for (y = 0; y < height; y++)
-				bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
-								  width * bytesPerPixel, 1, fp);
+			if (height >= 0)
+				for (y = 0; y < height; y++)
+					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
+									  width * bytesPerPixel, 1, fp);
+			else
+				for (y = -height - 1; y >= 0; y--)
+					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
+									  width * bytesPerPixel, 1, fp);
+			
 			
 			image = getFreeImage();
 			if (image)
@@ -885,20 +877,25 @@ Image loadImage(const char *path)
 				
 				glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 				
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
 					     textureWidth, textureHeight,
 					     0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
 					     GL_UNSIGNED_BYTE, p);
 				
+				printf("oh no: %d\n", height);
+				
 				glBindTexture(GL_TEXTURE_2D, 0);
 				
 				poloImage->textureWidth = textureWidth;
 				poloImage->textureHeight = textureHeight;
 				poloImage->width = width;
-				poloImage->height = height;
+				poloImage->height = abs(height);
 			}
 			
 			free(p);
