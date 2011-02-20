@@ -2,42 +2,48 @@
 /**
  * libpolo
  * Lightweight graphics library for educational environments
- * (C) 2011 by Marc S. Ressl (mressl@umich.edu)
+ * (C) 2011 by the libpolo team.
+ *     Marc S. Ressl (mressl@itba.edu.ar)
+ *     Jorge Prendes (jprendes@itba.edu.ar)
  * Released under the GPL
  *
- * Requires the freeglut library.
+ * Requires the glut library.
  */
 
 /*
  * Basics:
  * - Call initPolo() to initialize the graphics window.
- * - Polo continuously calls a user function to redraw the screen. 
- *   Use setDrawCallback() to define this function.
+ * - libpolo continuously calls a user function to redraw the screen. 
+ *   You can define this function with setDrawCallback().
  * - Call runPolo() to run graphics and get your user function called.
  * - To close the graphics window, call exitPolo().
  *
  * Drawing:
- * - The coordinate system (0, 0) is at the lower left.
- * - Color components (RGB, HSV) are in the range 0.0 to 1.0.
+ * - The coordinate origin (0, 0) is at the lower left.
+ * - Color components (RGBA, HSVA) are in the range 0.0 to 1.0.
  * - Alpha is the level of opacity.
- * - Images must be in uncompressed BMP format, using either
- *   24-bit RGB or 32-bit RGBA (for alpha transparency).
- * - Images can only be used after initPolo was called.
+ * - Drawing primitives are rendered using a border color (use setPenColor())
+ *   and fill color (setFillColor() or setFillGradient()).
+ *
+ * Using images:
+ * - Images must be in uncompressed BMP format, using 24-bit RGB or 32-bit RGBA.
+ * - Make sure you called initPolo before using images.
  * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
- *   This reference is 0 if the image could not be loaded.
- * - Use drawImage() to draw an image to screen.
- * - Use freeImage() after you finished using your image.
+ *   If the image could not be loaded you get the value 0.
+ * - Use drawImage() to draw an image to screen. The tint parameter lets you tint
+ *   your image with a color or alpha. To just paint, use POLO_WHITE.
+ * - Use freeImage() after you finished using an image.
+ * - You can call setTexture() to draw primitives with a texture. For drawing
+ *   textures, make sure the width and height of your image is a power of 2.
  *
  * Keyboard and mouse:
- * - You can use getPressedKey(), getMouseX(), getMouseY() and getMouseButtonState()
- *   to query the keyboard and mouse.
- * - Keyboard codes are in UNICODE. Special keys are defined in PoloKeys.
+ * - You can use getKey(), getMouseX(), getMouseY() and getMouseButtonState()
+ *   to query the keyboard and mouse. Use clearKey() to clear a read key.
+ * - Keyboard codes are in UNICODE. Special keys are defined in enum PoloKeys.
  *
- * Notifications:
- * - Polo can call you when certain events occur.
- * - Use setKeyboardCallback() to get notified when a keyboard key is pressed.
- * - Use setMouseMotionCallback() to get notified when the mouse is moved.
- * - Use setMouseButtonCallback() to get notified when a mouse button's state changes.
+ * Time:
+ * - Use getTime() to get the number of seconds since the program started.
+ *   This value is accurate up to several milliseconds.
  *
  */
 
@@ -49,8 +55,8 @@ extern "C" {
 #endif
 
 // Definitions
-#define Color int
-#define Image int
+#define Color unsigned int
+#define Image unsigned int
 
 enum PoloColors
 {
@@ -163,7 +169,7 @@ Color getColorFromHSV(float hue, float saturation, float value);
 
 void setPenColor(Color color);
 void setFillColor(Color color);
-void setGradientFillColors(Color color1, Color color2);
+void setFillGradient(Color color1, Color color2);
 
 void drawPoint(float x, float y);
 void drawLine(float x1, float y1, float x2, float y2);
@@ -172,6 +178,7 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
 void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
 void drawCircle(float x, float y, float radius);
+
 void clearScreen();
 void updateScreen();
 int getScreenWidth();
@@ -185,10 +192,8 @@ void drawText(float x, float y, const char *str);
 Image loadImage(const char *path);
 int getImageWidth(Image image);
 int getImageHeight(Image image);
-void setImageTint(Color color);
-void drawImage(float x, float y, Image image);
-void drawImageQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, Image image);
-void freeImage(Image image);
+void drawImage(float x, float y, Image image, Color tint);
+void setTexture(Image image);
 
 // Keyboard
 void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key));
