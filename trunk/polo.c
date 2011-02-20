@@ -10,7 +10,7 @@
  * Requires the glut library.
  */
 
-// Includes
+/* Includes */
 
 #include <math.h>
 #include <stdio.h>
@@ -18,32 +18,32 @@
 
 #include "polo.h"
 
-// #define USE_FREEGLUT
+/* #define USE_FREEGLUT */
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #ifdef USE_FREEGLUT
 #include <GLUT/freeglut.h>
-#endif // USE_FREEGLUT
+#endif /* USE_FREEGLUT */
 #else
 #include <GL/glut.h>
 #ifdef USE_FREEGLUT 
 #include <GL/freeglut.h>
-#endif // USE_FREEGLUT
-#endif // __APPLE__
+#endif /* USE_FREEGLUT */
+#endif /* __APPLE__ */
 
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
-#endif
+#endif /* M_PI */
 
 #ifndef GL_BGRA
 #define GL_BGRA GL_BGRA_EXT
-#endif
+#endif /* GL_BGRA */
 
 #ifndef GL_BGR
 #define GL_BGR GL_BGR_EXT
-#endif
+#endif /* GL_BGR */
 
 
 
@@ -98,14 +98,14 @@ typedef struct
 
 
 
-// Static variables
-// Note: static variables should always be avoided. They are used here
-//       because glut does not pass a user pointer to the callbacks.
+/* Static variables
+   Note: static variables should always be avoided. They are used here
+         because glut does not pass a user pointer to the callbacks. */
 static PoloState poloState;
 
 
 
-// Private callbacks
+/* Private callbacks */
 static void drawCallback()
 {
 	if (poloState.drawCallback)
@@ -245,7 +245,7 @@ static void timerCallback(int value)
 
 
 
-// Initialization & exit
+/* Initialization & exit */
 void setPoloUserData(void *userData)
 {
 	poloState.userData = userData;
@@ -260,19 +260,19 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	if (poloState.isInitialized)
 		return;
 	
-	// Init state
+	/* Init state */
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
 	setTextFont(POLO_HELVETICA_18);
 	
-	// Init glut
+	/* Init glut */
 	glutInit(&argc, (char **)argv);
 	
-	// Create glut window
+	/* Create glut window */
 	displayMode = GLUT_RGBA | GLUT_DEPTH;
 #ifndef __APPLE__
 	displayMode |= GLUT_DOUBLE;
-#endif
+#endif /* __APPLE__ */
 	glutInitWindowSize(width, height);
 	glutInitDisplayMode(displayMode);
 	glutCreateWindow(windowTitle);
@@ -281,10 +281,10 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 	poloState.isInitialized = 1;
 	
-	// Init run time (so it starts at 0 on all systems)
+	/* Init run time (so it starts at 0 on all systems) */
 	getTime();
 	
-	// Set internal callbacks
+	/* Set internal callbacks */
 	glutDisplayFunc(drawCallback);
 	glutReshapeFunc(resizeCallback);
 	glutIdleFunc(drawCallback);
@@ -296,26 +296,26 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
-#endif
+#endif /* USE_FREEGLUT */
 	
-#ifdef __WINDOWS__
-	wglSwapInterval(1);
-#endif
+#ifdef _WIN32
+/*	wglSwapInterval(1); */
+#endif /* _WIN32 */
 	
 #ifdef __APPLE__
 	{
 		const GLint sync = 1;
 		CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &sync);
 	}
-#endif // __APPLE__
+#endif /* __APPLE__ */
 	
-	// Configure OpenGL
+	/* Configure OpenGL */
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	glEnable(GL_TEXTURE_2D);
 	
-	// Clear front and back buffer
+	/* Clear front and back buffer */
 	clearScreen();
 	updateScreen();
 	clearScreen();
@@ -335,14 +335,14 @@ void exitPolo()
 	glutLeaveMainLoop();
 #else
 	exit(0);
-#endif
+#endif /* USE_FREEGLUT */
 	
 	poloState.isInitialized = 0;
 }
 
 
 
-// Drawing
+/* Drawing */
 
 void setDrawCallback(void (*drawCallback)(void *userData))
 {
@@ -390,15 +390,15 @@ Color getColorFromHSVA(float hue, float saturation, float value, float alpha)
 	{
 		float i, f, p, q, t;
 		
-		// If hue == 1.0, then wrap it around the circle to 0.0
+		/* If hue == 1.0, then wrap it around the circle to 0.0 */
 		if (h == 1.0)
 			h = 0.0;
 		
-		// sector 0 to 5
+		/* Sector 0 to 5 */
 		h *= 6.0;
-		// integer part of h (0,1,2,3,4,5 or 6)
+		/* Integer part of h (0,1,2,3,4,5 or 6) */
 		i = floor(h);
-		// factorial part of h (0 to 1)
+		/* Factorial part of h (0 to 1) */
 		f = h - i;
 		
 		p = v * (1.0f - s);
@@ -432,7 +432,7 @@ Color getColorFromHSVA(float hue, float saturation, float value, float alpha)
 				g = p;
 				b = v;
 				break;
-			// case 5 (or 6):
+			/* case 5 (or 6): */
 			default:
 				r = v;
 				g = p;
@@ -650,30 +650,6 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 
 void drawCircle(float x, float y, float radius)
 {
-/*	int i;
-	
-	if (!poloState.isInitialized)
-		return;
-	
-	if (radius < 0.001)
-		return;
-	
-	glBegin(GL_TRIANGLE_FAN);
-	setPoloColor(poloState.fillColor1);
-	glVertex2f(x, y);
-	setPoloColor(poloState.fillColor2);
-	for(i = 0; i <= 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0),
-		           y + radius * sin(i * 2.0 * M_PI / 360.0));
-	glEnd();
-	
-	glBegin(GL_LINE_LOOP);
-	setPoloColor(poloState.penColor);
-	for(i = 0; i < 360;i++)
-		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
-		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
-	glEnd();*/
-	
 	return drawRoundedRect(x, y, radius, radius, radius / 2.0);
 }
 
@@ -1020,7 +996,7 @@ void setTexture(Image image)
 
 
 
-// Keyboard
+/* Keyboard */
 
 void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key))
 {
@@ -1039,7 +1015,7 @@ void clearKey()
 
 
 
-// Mouse
+/* Mouse */
 
 void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y))
 {
@@ -1081,7 +1057,7 @@ void hideMousePointer()
 
 
 
-// Time
+/* Time */
 
 void setTimerCallback(void (*timerCallback)(void *userData, int id))
 {
@@ -1103,4 +1079,3 @@ float getTime()
 	
 	return glutGet(GLUT_ELAPSED_TIME) * 0.001;
 }
-
