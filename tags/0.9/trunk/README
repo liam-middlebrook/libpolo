@@ -1,0 +1,11 @@
+==libpolo==
+
+libpolo is a lightweight graphics library for educational environments.
+
+It is aimed towards students learning the C and C++ language, and is very suitable for high school and first-year university courses.
+
+It is built as a simple wrapper around the GLUT library, providing a very streamlined interface. It also allows full access to OpenGL calls.
+
+It is cross-platform, and works under Linux, Mac OS X and Windows.
+
+It is very easy to integrate in a project. Just add polo.c and polo.h in your project, and link with the GLUT library.
