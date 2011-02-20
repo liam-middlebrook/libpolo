@@ -888,8 +888,6 @@ Image loadImage(const char *path)
 					     0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
 					     GL_UNSIGNED_BYTE, p);
 				
-				printf("oh no: %d\n", height);
-				
 				glBindTexture(GL_TEXTURE_2D, 0);
 				
 				poloImage->textureWidth = textureWidth;
