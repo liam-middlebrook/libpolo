@@ -50,6 +50,21 @@
 #ifndef _LIBPOLO_H
 #define _LIBPOLO_H
 
+/* #define USE_FREEGLUT */
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <GLUT/glut.h>
+#ifdef USE_FREEGLUT
+#include <GLUT/freeglut.h>
+#endif /* USE_FREEGLUT */
+#else
+#include <GL/glut.h>
+#ifdef USE_FREEGLUT 
+#include <GL/freeglut.h>
+#endif /* USE_FREEGLUT */
+#endif /* __APPLE__ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

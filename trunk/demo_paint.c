@@ -26,8 +26,8 @@ void draw(void *userData)
 	DemoData *d = (DemoData *) userData;
 	char buf[256];
 	
-	/* Exit when ESC is pressed */
-	if (getKey() == 27)
+	/* Exit on key press */
+	if (getKey())
 		exitPolo();
 	
 	/* Clear screen with right mouse button */
