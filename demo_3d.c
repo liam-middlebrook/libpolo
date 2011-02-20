@@ -14,18 +14,38 @@
 
 #include "polo.h"
 
+#define DEMO_FIELD_OF_VIEW	45
+#define DEMO_NEAR_PLANE		1
+#define DEMO_FAR_PLANE		100
+
+#define DEMO_CAMERA_X			0
+#define DEMO_CAMERA_Y			0
+#define DEMO_CAMERA_Z			4
+
+#define DEMO_LOOKAT_X		0
+#define DEMO_LOOKAT_Y		0
+#define DEMO_LOOKAT_Z		0
+
+#define DEMO_UP_X			0
+#define DEMO_UP_Y			1
+#define DEMO_UP_Z			0
+
+#define LIGHT_ROT_FREQUENCY	0.25
+#define LIGHT_RADIUS		2
+#define LIGHT_POS_X			0
+#define LIGHT_POS_Y			2
+#define LIGHT_POS_Z			0
+
 void draw(void *userData)
 {
-	GLfloat lightPos[4] = { 0.0, 4.0, 0.0, 0.0 };
+	float lightPos[4];
 	
 	float woodAmbient[4] = { 1.0, 1.0, 1.0, 1.0 };
 	float woodDiffuse[4] = { 0.6, 0.4, 0.0, 1.0 };
 	float woodSpecular[4] = { 1.0, 0.8, 0.4, 1.0 };
+	float woodShininess = 50.0;
 	
-	float fieldOfView = 45;
 	float aspectRatio = (float) getScreenWidth() / getScreenHeight();
-	float nearPlane = 1;
-	float farPlane = 100;
 	
 	/* Exit on key press */
 	if (getKey())
@@ -36,28 +56,31 @@ void draw(void *userData)
 	/* Set projection */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(fieldOfView, aspectRatio, nearPlane, farPlane);
+	gluPerspective(DEMO_FIELD_OF_VIEW, aspectRatio, DEMO_NEAR_PLANE, DEMO_FAR_PLANE);
 	
 	/* Set camera */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0, 0, 4,
-			  0, 0, 0,
-			  0, 1, 0);
+	gluLookAt(DEMO_CAMERA_X, DEMO_CAMERA_Y, DEMO_CAMERA_Z,
+			  DEMO_LOOKAT_X, DEMO_LOOKAT_Y, DEMO_LOOKAT_Z,
+			  DEMO_UP_X, DEMO_UP_Y, DEMO_UP_Z);
 	
 	/* Set rotating light around XZ plane */
-	lightPos[0] = 2.0 * cos(2.0 * M_PI * getTime() * 0.25);
-	lightPos[2] = 2.0 * sin(2.0 * M_PI * getTime() * 0.25);
+	lightPos[0] = LIGHT_POS_X + LIGHT_RADIUS * cos(2.0 * M_PI * getTime() * LIGHT_ROT_FREQUENCY);
+	lightPos[1] = LIGHT_POS_Y;
+	lightPos[2] = LIGHT_POS_Z + LIGHT_RADIUS * sin(2.0 * M_PI * getTime() * LIGHT_ROT_FREQUENCY);
+	lightPos[3] = 0;
+	
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 	
 	/* Set material */
 	glMaterialfv(GL_FRONT, GL_AMBIENT, woodAmbient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, woodDiffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, woodSpecular);
-	glMaterialf(GL_FRONT, GL_SHININESS, 50.0);
+	glMaterialf(GL_FRONT, GL_SHININESS, woodShininess);
 	glColor4fv(woodDiffuse);
 	
-	/* Rotate with mouse (after setting the light) */
+	/* Rotate camera with mouse (after setting the light) */
 	glRotatef(225 - 360.0 * getMouseY() / getScreenHeight(), 1, 0, 0);
 	glRotatef(135 + 360.0 * getMouseX() / getScreenWidth(), 0, 1, 0);
 	
