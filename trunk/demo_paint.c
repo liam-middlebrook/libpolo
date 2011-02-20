@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	DemoData demoData;
 	
 	// Init polo
-	initPolo(640, 480, 0, "Polo Paint");
+	initPolo(640, 480, 0, "Mouse Painter");
 	
 	// Init our variables
 	setPoloUserData(&demoData);
