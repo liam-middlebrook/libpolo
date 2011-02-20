@@ -1,6 +1,5 @@
 =libpolo installation instructions=
-Copyright 2011 by Marc S. Ressl.
-mressl@gmail.com
+Copyright 2011 by Marc S. Ressl, mressl@gmail.com
 
 ==GLUT==
 
@@ -34,20 +33,20 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 
 At the command line, type:
 
-  gcc -o demo -l glut polo.c demo.c
+  gcc -o demo_paint -l glut polo.c demo_paint.c
 
 ==Mac OS X==
 
 At the command line, type:
 
-  gcc -o demo -framework GLUT -framework OpenGL polo.c demo.c
+  gcc -o demo_paint -framework GLUT -framework OpenGL polo.c demo_paint.c
   
 ==Microsoft Visual Studio 2008==
 
 * Create a new project
 * Choose "Win32 Console Application"
 * Choose "Empty project"
-* Put the files polo.c and demo.c in the project
+* Put the files polo.c and demo_paint.c in the project
 * Go to Project > Properties
 * In the Configuration list box, select "All Configurations"
 * In C/C++ > General > Additional Include Directories, add the path to your include folder
@@ -55,4 +54,3 @@ At the command line, type:
 * In Linker > General > Additional Library Directories, add the path to your lib folder
 * In Build Events > Post Build Event, add this entry: "copy [path to your glut32.dll] [path to your executable file]" 
 * Compile and enjoy
-
