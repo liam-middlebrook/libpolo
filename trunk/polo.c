@@ -3,8 +3,8 @@
  * libpolo
  * Lightweight graphics library for educational environments
  * (C) 2011 by the libpolo team.
- * - Marc S. Ressl (mressl@itba.edu.ar)
- * - Jorge Prendes (jprendes@itba.edu.ar)
+ *     Marc S. Ressl (mressl@itba.edu.ar)
+ *     Jorge Prendes (jprendes@itba.edu.ar)
  * Released under the GPL
  *
  * Requires the glut library.
