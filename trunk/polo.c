@@ -2,7 +2,9 @@
 /**
  * libpolo
  * Lightweight graphics library for educational environments
- * (C) 2011 by Marc S. Ressl (mressl@umich.edu)
+ * (C) 2011 by the libpolo team.
+ * - Marc S. Ressl (mressl@itba.edu.ar)
+ * - Jorge Prendes (jprendes@itba.edu.ar)
  * Released under the GPL
  *
  * Requires the glut library.
@@ -70,7 +72,6 @@ typedef struct
 	Color penColor;
 	Color fillColor1;
 	Color fillColor2;
-	Color imageTint;
 	PoloImage images[POLO_MAX_IMAGES];
 	void *font;
 	float fontHeight;
@@ -99,7 +100,7 @@ typedef struct
 
 // Static variables
 // Note: static variables should always be avoided. They are used here
-//       because freeglut does not pass a user pointer to the callbacks.
+//       because glut does not pass a user pointer to the callbacks.
 static PoloState poloState;
 
 
@@ -253,7 +254,7 @@ void setPoloUserData(void *userData)
 void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 {
 	int argc = 1;
-	int value;
+	int displayMode;
 	const char *argv[2] = {"polo", NULL};
 	
 	if (poloState.isInitialized)
@@ -262,15 +263,18 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	// Init state
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
-	setImageTint(POLO_WHITE);
 	setTextFont(POLO_HELVETICA_18);
 	
 	// Init glut
 	glutInit(&argc, (char **)argv);
 	
 	// Create glut window
+	displayMode = GLUT_RGBA | GLUT_DEPTH;
+#ifndef __APPLE__
+	displayMode |= GLUT_DOUBLE;
+#endif
 	glutInitWindowSize(width, height);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(displayMode);
 	glutCreateWindow(windowTitle);
 	if (fullscreen)
 		glutFullScreen();
@@ -456,7 +460,7 @@ void setFillColor(Color color)
 	poloState.fillColor2 = color;
 }
 
-void setGradientFillColors(Color color1, Color color2)
+void setFillGradient(Color color1, Color color2)
 {
 	poloState.fillColor1 = color1;
 	poloState.fillColor2 = color2;
@@ -504,15 +508,19 @@ void drawRect(float x, float y, float width, float height)
 	if (!poloState.isInitialized)
 		return;
 	
-	if ((width < 0) || (height < 0))
+	if ((width <= 0) || (height <= 0))
 		return;
 	
 	glBegin(GL_QUADS);
 	setPoloColor(poloState.fillColor2);
+	glTexCoord2f(0, 0);
 	glVertex2f(x, y);
+	glTexCoord2f(1.0, 0);
 	glVertex2f(x + width, y);
 	setPoloColor(poloState.fillColor1);
+	glTexCoord2f(1.0, 1.0);
 	glVertex2f(x + width, y + height);
+	glTexCoord2f(0.0, 1.0);
 	glVertex2f(x, y + height);
 	glEnd();
 	
@@ -533,7 +541,7 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 	if (!poloState.isInitialized)
 		return;
 	
-	if ((width < 0) || (height < 0))
+	if ((width <= 0) || (height <= 0))
 		return;
 	
 	maxEdgeRadius = (width < height) ? width / 2.0 : height / 2.0;
@@ -551,16 +559,18 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 		float xp, yp1, yp2;
 		
 		if (i < 90)
-			xp = x + edgeRadius - xr;
+			xp = edgeRadius - xr;
 		else
-			xp = x + width - edgeRadius - xr;
-		yp1 = y - yr + edgeRadius;
-		yp2 = y + height + yr - edgeRadius;
+			xp = width - edgeRadius - xr;
+		yp1 = -yr + edgeRadius;
+		yp2 = height + yr - edgeRadius;
 		
 		setPoloColor(poloState.fillColor2);
-		glVertex2f(xp, yp1);
+		glTexCoord2f(xp / width, yp1 / height);
+		glVertex2f(x + xp, y + yp1);
 		setPoloColor(poloState.fillColor1);
-		glVertex2f(xp, yp2);
+		glTexCoord2f(xp / width, yp2 / height);
+		glVertex2f(x + xp, y + yp2);
 	}
 	glEnd();
 	
@@ -594,9 +604,12 @@ void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3)
 	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
+	glTexCoord2f(0, 0);
 	glVertex2f(x1, y1);
+	glTexCoord2f(1, 0);
 	glVertex2f(x2, y2);
 	setPoloColor(poloState.fillColor1);
+	glTexCoord2f(1, 1);
 	glVertex2f(x3, y3);
 	glEnd();
 	
@@ -615,10 +628,14 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 	
 	glBegin(GL_TRIANGLES);
 	setPoloColor(poloState.fillColor2);
+	glTexCoord2f(0, 0);
 	glVertex2f(x1, y1);
+	glTexCoord2f(1, 0);
 	glVertex2f(x2, y2);
 	setPoloColor(poloState.fillColor1);
+	glTexCoord2f(1, 1);
 	glVertex2f(x3, y3);
+	glTexCoord2f(0, 1);
 	glVertex2f(x4, y4);
 	glEnd();
 	
@@ -633,7 +650,7 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 
 void drawCircle(float x, float y, float radius)
 {
-	int i;
+/*	int i;
 	
 	if (!poloState.isInitialized)
 		return;
@@ -655,7 +672,9 @@ void drawCircle(float x, float y, float radius)
 	for(i = 0; i < 360;i++)
 		glVertex2f(x + radius * cos(i * 2.0 * M_PI / 360.0) + 0.5,
 		           y + radius * sin(i * 2.0 * M_PI / 360.0) + 0.5);
-	glEnd();
+	glEnd();*/
+	
+	return drawRoundedRect(x, y, radius, radius, radius / 2.0);
 }
 
 void clearScreen()
@@ -878,7 +897,8 @@ Image loadImage(const char *path)
 			
 			// Read line by line from image
 			for (y = 0; y < height; y++)
-				bytesRead = fread(&p[y * textureWidth * bytesPerPixel], width * bytesPerPixel, 1, fp);
+				bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
+								  width * bytesPerPixel, 1, fp);
 			
 			image = getFreeImage();
 			if (image)
@@ -930,66 +950,6 @@ int getImageHeight(Image image)
 	return poloState.images[image].height;
 }
 
-void setImageTint(Color color)
-{
-	poloState.imageTint = color;
-}
-
-void drawImageQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, Image image){
-	PoloImage *poloImage;
-	float width, height;
-	
-	if (!poloState.isInitialized)
-		return;
-	
-	if (image >= POLO_MAX_IMAGES)
-		return;
-	
-	poloImage = &poloState.images[image];
-	
-	if (!poloImage->texture)
-		return;
-	
-	width = ((float) poloImage->width) / poloImage->textureWidth;
-	height = ((float) poloImage->height) / poloImage->textureHeight;
-	
-	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
-	
-	setPoloColor(poloState.imageTint);
-	
-	glBegin(GL_QUADS);
-	glTexCoord2f(0, 0);
-	glVertex2f(x1, y1);
-	glTexCoord2f(width, 0);
-	glVertex2f(x2, y2);
-	glTexCoord2f(width, height);
-	glVertex2f(x3, y3);
-	glTexCoord2f(0, height);
-	glVertex2f(x4, y4);
-	glEnd();
-	
-	glBindTexture(GL_TEXTURE_2D, 0);	
-}
-
-void drawImage(float x, float y, Image image)
-{
-	PoloImage *poloImage;
-	
-	if (!poloState.isInitialized)
-		return;
-	
-	if (image >= POLO_MAX_IMAGES)
-		return;
-	
-	poloImage = &poloState.images[image];
-	
-	drawImageQuad( x, y,
-	               x + poloImage->width, y,
-	               x + poloImage->width, y + poloImage->height,
-	               x, y + poloImage->height,
-	               image);
-}
-
 void freeImage(Image image)
 {
 	if (!poloState.isInitialized)
@@ -1005,6 +965,57 @@ void freeImage(Image image)
 	poloState.images[image].textureHeight = 0;
 	poloState.images[image].width = 0;
 	poloState.images[image].height = 0;
+}
+
+void drawImage(float x, float y, Image image, Color tint)
+{
+	PoloImage *poloImage;
+	float texCoordWidth, texCoordHeight;
+	
+	if (!poloState.isInitialized)
+		return;
+	
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	poloImage = &poloState.images[image];
+	
+	if (!poloImage->texture)
+		return;
+	
+	texCoordWidth = ((float) poloImage->width) / poloImage->textureWidth;
+	texCoordHeight = ((float) poloImage->height) / poloImage->textureHeight;
+	
+	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
+	
+	setPoloColor(tint);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex2f(x, y);
+	glTexCoord2f(texCoordWidth, 0);
+	glVertex2f(x + poloImage->width, y);
+	glTexCoord2f(texCoordWidth, texCoordHeight);
+	glVertex2f(x + poloImage->width, y + poloImage->height);
+	glTexCoord2f(0, texCoordHeight);
+	glVertex2f(x, y + poloImage->height);
+	glEnd();
+	
+	glBindTexture(GL_TEXTURE_2D, 0);	
+}
+
+void setTexture(Image image)
+{
+	PoloImage *poloImage;
+	
+	if (!poloState.isInitialized)
+		return;
+	
+	if (image >= POLO_MAX_IMAGES)
+		return;
+	
+	poloImage = &poloState.images[image];
+	
+	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
 }
 
 
