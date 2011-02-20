@@ -13,9 +13,11 @@
 #include <stdio.h>
 #include "polo.h"
 
+#define TOOLBAR_WIDTH 128
+
 typedef struct
 {
-	int image;
+	Image brush;
 	int frame;
 } DemoData;
 
@@ -33,19 +35,19 @@ void draw(void *userData)
 		clearScreen();
 	// Paint with left mouse button
 	if (isMouseButtonPressed(0))
-		drawImage(getMouseX() - getImageWidth(d->image) / 2,
-		          getMouseY() - getImageHeight(d->image) / 2,
-		          d->image, getColorFromRGBA(1, 1, 1, 0.1));
+		drawImage(getMouseX() - getImageWidth(d->brush) / 2,
+				  getMouseY() - getImageHeight(d->brush) / 2,
+				  d->brush, getColorFromRGBA(1, 1, 1, 0.1));
 	
 	// Draw left bar
 	setPenColor(POLO_STEEL);
 	setFillGradient(POLO_SILVER, POLO_TUNGSTEN);
-	drawRect(-1, -1, 128, getScreenHeight() + 2);
+	drawRect(-1, -1, TOOLBAR_WIDTH, getScreenHeight() + 2);
 	
-	// Draw frames per second display
+	// Draw frames per second and time display
 	setPenColor(POLO_BLACK);
 	sprintf(buf, "FPS: %.3f", d->frame / (getTime() + 0.001));
-	drawText((128 - getTextDrawWidth(buf)) / 2,
+	drawText((TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
 			 getScreenHeight() - getTextDrawHeight(buf) - 10,
 	         buf);
 	
@@ -58,12 +60,12 @@ int main(int argc, char *argv[])
 	DemoData demoData;
 	
 	// Init polo
-	initPolo(640, 480, 0, "Mouse Painter");
+	initPolo(640, 480, 0, "Polo Paint");
 	
 	// Init our variables
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
-	demoData.image = loadImage("brush.bmp");
+	demoData.brush = loadImage("brush.bmp");
 	demoData.frame = 0;
 	
 	// Run polo
