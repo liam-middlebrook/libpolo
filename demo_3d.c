@@ -18,9 +18,9 @@
 #define DEMO_NEAR_PLANE		1
 #define DEMO_FAR_PLANE		100
 
-#define DEMO_CAMERA_X			0
-#define DEMO_CAMERA_Y			0
-#define DEMO_CAMERA_Z			4
+#define DEMO_CAMERA_X		0
+#define DEMO_CAMERA_Y		0
+#define DEMO_CAMERA_Z		4
 
 #define DEMO_LOOKAT_X		0
 #define DEMO_LOOKAT_Y		0
