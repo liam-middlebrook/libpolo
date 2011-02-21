@@ -611,7 +611,7 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 	if (!poloState.isInitialized)
 		return;
 	
-	glBegin(GL_TRIANGLES);
+	glBegin(GL_QUADS);
 	setPoloColor(poloState.fillColor2);
 	glTexCoord2f(0, 0);
 	glVertex2f(x1, y1);
