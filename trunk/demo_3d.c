@@ -93,8 +93,6 @@ void draw(void *userData)
 
 int main(int argc, char *argv[])
 {
-	GLfloat position[] = {0.0, 0.0, 1.5, 1.0};
-	
 	/* Init polo */
 	initPolo(640, 480, 0, "Teapot Demo");
 	
@@ -102,7 +100,6 @@ int main(int argc, char *argv[])
 	setDrawCallback(draw);
 	
 	/* Configure OpenGL */
-	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
