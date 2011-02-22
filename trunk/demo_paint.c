@@ -27,6 +27,7 @@ void draw(void *userData)
 {
 	DemoData *d = (DemoData *) userData;
 	char buf[256];
+	int x, y;
 	
 	/* Exit on key press */
 	if (getKey())
@@ -63,10 +64,10 @@ void draw(void *userData)
 	d->frame++;
 	
 	/* Paint color palette */
-	for (int x = 0; x < 128; x++)
-		for (int y = 0; y < 128; y++)
+	for (x = 0; x < 128; x++)
+		for (y = 0; y < 128; y++)
 		{
-			setPenColor(getColorFromHSV((x * 16 / 128) / 16.0, y / 128.0, 1.0));
+			setPenColor(getColorFromHSV(x / 128.0, y / 128.0, 1.0));
 			drawPoint(x, y);
 		}
 }
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
 	demoData.brush = loadImage("brush.bmp");
-	demoData.frame = getColorFromRGBA(1, 1, 1, BRUSH_ALPHA);
+	demoData.tint = getColorFromRGBA(1, 1, 1, BRUSH_ALPHA);
 	
 	/* Run polo */
 	runPolo();

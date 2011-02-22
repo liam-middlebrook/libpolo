@@ -196,8 +196,8 @@ void drawCircle(float x, float y, float radius);
 
 void clearScreen();
 void updateScreen();
-int getScreenWidth();
-int getScreenHeight();
+float getScreenWidth();
+float getScreenHeight();
 
 void setTextFont(enum PoloFont font);
 float getTextDrawWidth(const char *str);
@@ -205,8 +205,8 @@ float getTextDrawHeight(const char *str);
 void drawText(float x, float y, const char *str);
 
 Image loadImage(const char *path);
-int getImageWidth(Image image);
-int getImageHeight(Image image);
+float getImageWidth(Image image);
+float getImageHeight(Image image);
 void drawImage(float x, float y, Image image, Color tint);
 void setTexture(Image image);
 
