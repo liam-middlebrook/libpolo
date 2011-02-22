@@ -655,12 +655,12 @@ void updateScreen()
 	glutSwapBuffers();
 }
 
-int getScreenWidth()
+float getScreenWidth()
 {
 	return glutGet(GLUT_WINDOW_WIDTH);
 }
 
-int getScreenHeight()
+float getScreenHeight()
 {
 	return glutGet(GLUT_WINDOW_HEIGHT);
 }
@@ -905,7 +905,7 @@ Image loadImage(const char *path)
 	return image;
 }
 
-int getImageWidth(Image image)
+float getImageWidth(Image image)
 {
 	if (image >= POLO_MAX_IMAGES)
 		return 0;
@@ -913,7 +913,7 @@ int getImageWidth(Image image)
 	return poloState.images[image].width;
 }
 
-int getImageHeight(Image image)
+float getImageHeight(Image image)
 {
 	if (image >= POLO_MAX_IMAGES)
 		return 0;
