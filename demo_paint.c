@@ -13,12 +13,14 @@
 #include <stdio.h>
 #include "polo.h"
 
-#define TOOLBAR_WIDTH 128
+#define TOOLBAR_WIDTH 130
+#define BRUSH_ALPHA 0.1
 
 typedef struct
 {
 	Image brush;
 	int frame;
+	Color tint;
 } DemoData;
 
 void draw(void *userData)
@@ -33,11 +35,17 @@ void draw(void *userData)
 	/* Clear screen with right mouse button */
 	if (isMouseButtonPressed(1))
 		clearScreen();
+	
 	/* Paint with left mouse button */
 	if (isMouseButtonPressed(0))
-		drawImage(getMouseX() - getImageWidth(d->brush) / 2,
-				  getMouseY() - getImageHeight(d->brush) / 2,
-				  d->brush, getColorFromRGBA(1, 1, 1, 0.1));
+	{
+		if ((getMouseX() < 128) && (getMouseY() < 128))
+			d->tint = getColorFromHSVA(getMouseX() / 128, getMouseY() / 128, 1, BRUSH_ALPHA);
+		else
+			drawImage(getMouseX() - getImageWidth(d->brush) / 2,
+					  getMouseY() - getImageHeight(d->brush) / 2,
+					  d->brush, d->tint);
+	}
 	
 	/* Draw left bar */
 	setPenColor(POLO_STEEL);
@@ -53,6 +61,14 @@ void draw(void *userData)
 	
 	/* Increment frame number */
 	d->frame++;
+	
+	/* Paint color palette */
+	for (int x = 0; x < 128; x++)
+		for (int y = 0; y < 128; y++)
+		{
+			setPenColor(getColorFromHSV((x * 16 / 128) / 16.0, y / 128.0, 1.0));
+			drawPoint(x, y);
+		}
 }
 
 int main(int argc, char *argv[])
@@ -65,9 +81,10 @@ int main(int argc, char *argv[])
 	/* Init variables */
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
-	demoData.brush = loadImage("demo.bmp");
-	demoData.frame = 0;
+	demoData.brush = loadImage("brush.bmp");
+	demoData.frame = getColorFromRGBA(1, 1, 1, BRUSH_ALPHA);
 	
 	/* Run polo */
 	runPolo();
 }
+
