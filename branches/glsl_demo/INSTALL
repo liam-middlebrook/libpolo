@@ -1,0 +1,60 @@
+=libpolo installation instructions=
+Copyright 2011 by Marc S. Ressl, mressl@gmail.com
+
+==GLUT==
+
+libpolo requires the GLUT library. Follow these steps to install GLUT on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  apt-get install freeglut3-dev
+
+* Include polo.c/polo.h in your project.
+
+===Mac OS X===
+
+* No need to install GLUT, it's already installed.
+
+===Microsoft Windows===
+
+* Download the GLUT binary distribution from
+
+  http://www.xmission.com/~nate/glut.html
+
+* Copy the .lib and .dll files to your lib folder (create one if you don't have one).
+* Copy the .h file to your include folder (create one if you don't have one).
+
+
+
+==Compiling the demos==
+
+For the other demos, replace demo_helloworld with demo_paint and demo_3d.
+
+==Linux==
+
+At the command line, type:
+
+  gcc -o demo -l glut -l glu polo.c demo_helloworld.c
+
+==Mac OS X==
+
+At the command line, type:
+
+  gcc -o demo -framework GLUT -framework OpenGL polo.c demo_helloworld.c
+  
+==Microsoft Visual Studio 2008==
+
+* Create a new project
+* Choose "Win32 Console Application"
+* Choose "Empty project"
+* Put the files polo.c and demo_helloworld.c in the project
+* Go to Project > Properties
+* In the Configuration list box, select "All Configurations"
+* In C/C++ > General > Additional Include Directories, add the path to your include folder
+* In Linker > Input > Additional Dependencies. Type "opengl32.lib glu32.lib glut32.lib"
+* In Linker > General > Additional Library Directories, add the path to your lib folder
+* In Build Events > Post Build Event, add this entry: "copy [path to your glut32.dll] [path to your executable file]" 
+* Compile and enjoy
+
