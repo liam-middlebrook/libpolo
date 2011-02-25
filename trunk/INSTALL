@@ -1,5 +1,8 @@
 =libpolo installation instructions=
+
 Copyright 2011 by Marc S. Ressl, mressl@gmail.com
+
+
 
 ==GLUT==
 
@@ -11,11 +14,9 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 
   apt-get install freeglut3-dev
 
-* Include polo.c/polo.h in your project.
-
 ===Mac OS X===
 
-* No need to install GLUT, it's already installed.
+* GLUT is already installed.
 
 ===Microsoft Windows===
 
@@ -23,8 +24,9 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 
   http://www.xmission.com/~nate/glut.html
 
-* Copy the .lib and .dll files to your lib folder (create one if you don't have one).
-* Copy the .h file to your include folder (create one if you don't have one).
+* Copy the .lib and .dll files to your "lib" folder (create one if you don't have one).
+* Copy the .h file to your "include" folder (create one if you don't have one).
+* Add the lib and include folders to your project configuration (if you haven't yet).
 
 
 
@@ -51,7 +53,7 @@ At the command line, type:
 * Create a new project
 * Choose "Win32 Console Application"
 * Choose "Empty project"
-* Put the files polo.c and demo_helloworld.c (or demo_paint.c, demo_3d.c) in the project
+* Put the files polo.c and demo_helloworld.c (or demo_paint.c, demo_3d.c for the other demos) in the project
 * Go to Project > Properties
 * In the Configuration list box, select "All Configurations"
 * In C/C++ > General > Additional Include Directories, add the path to your include folder
