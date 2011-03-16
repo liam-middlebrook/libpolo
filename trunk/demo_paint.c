@@ -56,8 +56,8 @@ void draw(void *userData)
 	/* Draw frames per second and time display */
 	setPenColor(POLO_BLACK);
 	sprintf(buf, "FPS: %.3f", d->frame / (getTime() + 0.001));
-	drawText((TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
-			 getScreenHeight() - getTextDrawHeight(buf) - 10,
+	drawText(10,//(TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
+		 getScreenHeight() - getTextDrawHeight(buf) - 10,
 	         buf);
 	
 	/* Increment frame number */
@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
 	demoData.brush = loadImage("brush.bmp");
+	demoData.frame = 0;
 	demoData.tint = getColorFromRGBA(1, 1, 1, BRUSH_ALPHA);
 	
 	/* Run polo */
