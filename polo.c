@@ -18,17 +18,21 @@
 
 #include "polo.h"
 
+#if (!defined(_WIN32) && !defined(__APPLE__))
+#include <GL/glx.h>
+#endif
+
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
-#endif /* M_PI */
+#endif
 
 #ifndef GL_BGRA
 #define GL_BGRA GL_BGRA_EXT
-#endif /* GL_BGRA */
+#endif
 
 #ifndef GL_BGR
 #define GL_BGR GL_BGR_EXT
-#endif /* GL_BGR */
+#endif
 
 
 
@@ -281,18 +285,22 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
-#endif /* USE_FREEGLUT */
-	
-#ifdef _WIN32
-/*	wglSwapInterval(1); */
-#endif /* _WIN32 */
+#endif
 	
 #ifdef __APPLE__
 	{
 		const GLint sync = 1;
 		CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &sync);
 	}
-#endif /* __APPLE__ */
+#endif
+	
+#ifdef GLX_SGI_swap_control
+	glXSwapIntervalSGI(1);
+#endif
+	
+#ifdef _WIN32
+/*	swapInterval(1);*/
+#endif
 	
 	/* Configure OpenGL */
 	glEnable(GL_BLEND);
@@ -320,7 +328,7 @@ void exitPolo()
 	glutLeaveMainLoop();
 #else
 	exit(0);
-#endif /* USE_FREEGLUT */
+#endif
 	
 	poloState.isInitialized = 0;
 }
