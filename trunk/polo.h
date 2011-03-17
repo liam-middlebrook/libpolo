@@ -27,13 +27,13 @@
  *
  * Using images:
  * - Images must be in uncompressed BMP format, using 24-bit RGB or 32-bit RGBA.
- * - Make sure you called initPolo before using images.
+ * - Make sure you called initPolo before loading images.
  * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
  *   If the image could not be loaded you get the value 0.
  * - Use drawImage() to draw an image to screen. The tint parameter lets you tint
  *   your image with a color or alpha. To just paint, use POLO_WHITE.
  * - Use freeImage() after you finished using an image.
- * - You can call setTexture() to draw primitives with a texture. For drawing
+ * - You can call setTexture() to texture the fill color. For drawing
  *   textures, make sure the width and height of your image is a power of 2.
  *
  * Keyboard and mouse:
@@ -57,13 +57,13 @@
 #include <GLUT/glut.h>
 #ifdef USE_FREEGLUT
 #include <GLUT/freeglut.h>
-#endif /* USE_FREEGLUT */
+#endif
 #else
 #include <GL/glut.h>
 #ifdef USE_FREEGLUT 
 #include <GL/freeglut.h>
-#endif /* USE_FREEGLUT */
-#endif /* __APPLE__ */
+#endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,58 +75,58 @@ extern "C" {
 
 enum PoloColors
 {
-    POLO_TRANSPARENT    = 0x00000000,
-    POLO_WHITE          = 0xffffffff,
-    POLO_BLACK          = 0x000000ff,
-
-    POLO_CANTALOUPE     = 0xffcc66ff,
-    POLO_HONEYDEW       = 0xccff66ff,
-    POLO_SPINDRIFT      = 0x66ffccff,
-    POLO_SKY            = 0x66ccffff,
-    POLO_LAVENDER       = 0xcc66ffff,
-    POLO_CARNATION      = 0xff6fcfff,
-    POLO_LICORICE       = 0x000000ff,
-    POLO_SNOW           = 0xffffffff,
-    POLO_SALMON         = 0xff6666ff,
-    POLO_BANANA         = 0xffff66ff,
-    POLO_FLORA          = 0x66ff66ff,
-    POLO_ICE            = 0x66ffffff,
-    POLO_ORCHID         = 0x6666ffff,
-    POLO_BUBBLEGUM      = 0xff66ffff,
-    POLO_LEAD           = 0x191919ff,
-    POLO_MERCURY        = 0xe6e6e6ff,
-    POLO_TANGERINE      = 0xff8000ff,
-    POLO_LIME           = 0x80ff00ff,
-    POLO_SEAFOAM        = 0x00ff80ff,
-    POLO_AQUA           = 0x0080ffff,
-    POLO_GRAPE          = 0x8000ffff,
-    POLO_STRAWBERRY     = 0xff0080ff,
-    POLO_TUNGSTEN       = 0x333333ff,
-    POLO_SILVER         = 0xccccccff,
-    POLO_MARASCHINO     = 0xff0000ff,
-    POLO_LEMON          = 0xffff00ff,
-    POLO_SPRING         = 0x00ff00ff,
-    POLO_TURQUOISE      = 0x00ffffff,
-    POLO_BLUEBERRY      = 0x0000ffff,
-    POLO_MAGENTA        = 0xff00ffff,
-    POLO_IRON           = 0x424242ff,
-    POLO_MAGNESIUM      = 0xb3b3b3ff,
-    POLO_MOCHA          = 0x804000ff,
-    POLO_FERN           = 0x408000ff,
-    POLO_MOSS           = 0x008040ff,
-    POLO_OCEAN          = 0x004080ff,
-    POLO_EGGPLANT       = 0x400080ff,
-    POLO_MAROON         = 0x800040ff,
-    POLO_STEEL          = 0x666666ff,
-    POLO_ALUMINUM       = 0x999999ff,
-    POLO_CAYENNE        = 0x800000ff,
-    POLO_ASPARAGUS      = 0x808000ff,
-    POLO_CLOVER         = 0x008000ff,
-    POLO_TEAL           = 0x008080ff,
-    POLO_MIDNIGHT       = 0x000080ff,
-    POLO_PLUM           = 0x800080ff,
-    POLO_TIN            = 0x7f7f7fff,
-    POLO_NICKEL         = 0x808080ff,
+	POLO_TRANSPARENT    = 0x00000000,
+	POLO_WHITE          = 0xffffffff,
+	POLO_BLACK          = 0x000000ff,
+	
+	POLO_CANTALOUPE     = 0xffcc66ff,
+	POLO_HONEYDEW       = 0xccff66ff,
+	POLO_SPINDRIFT      = 0x66ffccff,
+	POLO_SKY            = 0x66ccffff,
+	POLO_LAVENDER       = 0xcc66ffff,
+	POLO_CARNATION      = 0xff6fcfff,
+	POLO_LICORICE       = 0x000000ff,
+	POLO_SNOW           = 0xffffffff,
+	POLO_SALMON         = 0xff6666ff,
+	POLO_BANANA         = 0xffff66ff,
+	POLO_FLORA          = 0x66ff66ff,
+	POLO_ICE            = 0x66ffffff,
+	POLO_ORCHID         = 0x6666ffff,
+	POLO_BUBBLEGUM      = 0xff66ffff,
+	POLO_LEAD           = 0x191919ff,
+	POLO_MERCURY        = 0xe6e6e6ff,
+	POLO_TANGERINE      = 0xff8000ff,
+	POLO_LIME           = 0x80ff00ff,
+	POLO_SEAFOAM        = 0x00ff80ff,
+	POLO_AQUA           = 0x0080ffff,
+	POLO_GRAPE          = 0x8000ffff,
+	POLO_STRAWBERRY     = 0xff0080ff,
+	POLO_TUNGSTEN       = 0x333333ff,
+	POLO_SILVER         = 0xccccccff,
+	POLO_MARASCHINO     = 0xff0000ff,
+	POLO_LEMON          = 0xffff00ff,
+	POLO_SPRING         = 0x00ff00ff,
+	POLO_TURQUOISE      = 0x00ffffff,
+	POLO_BLUEBERRY      = 0x0000ffff,
+	POLO_MAGENTA        = 0xff00ffff,
+	POLO_IRON           = 0x424242ff,
+	POLO_MAGNESIUM      = 0xb3b3b3ff,
+	POLO_MOCHA          = 0x804000ff,
+	POLO_FERN           = 0x408000ff,
+	POLO_MOSS           = 0x008040ff,
+	POLO_OCEAN          = 0x004080ff,
+	POLO_EGGPLANT       = 0x400080ff,
+	POLO_MAROON         = 0x800040ff,
+	POLO_STEEL          = 0x666666ff,
+	POLO_ALUMINUM       = 0x999999ff,
+	POLO_CAYENNE        = 0x800000ff,
+	POLO_ASPARAGUS      = 0x808000ff,
+	POLO_CLOVER         = 0x008000ff,
+	POLO_TEAL           = 0x008080ff,
+	POLO_MIDNIGHT       = 0x000080ff,
+	POLO_PLUM           = 0x800080ff,
+	POLO_TIN            = 0x7f7f7fff,
+	POLO_NICKEL         = 0x808080ff,
 };
 
 enum PoloKey
@@ -159,13 +159,13 @@ enum PoloKey
 
 enum PoloFont
 {
-    POLO_COURIER_13,
-    POLO_COURIER_15,
-    POLO_TIMES_10,
-    POLO_TIMES_24,
-    POLO_HELVETICA_10,
-    POLO_HELVETICA_12,
-    POLO_HELVETICA_18,
+	POLO_COURIER_13,
+	POLO_COURIER_15,
+	POLO_TIMES_10,
+	POLO_TIMES_24,
+	POLO_HELVETICA_10,
+	POLO_HELVETICA_12,
+	POLO_HELVETICA_18,
 };
 
 // Initialization & exit
@@ -209,6 +209,7 @@ float getImageWidth(Image image);
 float getImageHeight(Image image);
 void drawImage(float x, float y, Image image, Color tint);
 void setTexture(Image image);
+void freeImage(Image image);
 
 // Keyboard
 void setKeyboardCallback(void (*keyboardCallback)(void *userData, int key));
@@ -233,4 +234,5 @@ float getTime();
 }
 #endif
 
-#endif // _LIBPOLO_H
+#endif
+

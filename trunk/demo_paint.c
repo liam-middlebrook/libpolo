@@ -88,5 +88,7 @@ int main(int argc, char *argv[])
 	
 	/* Run polo */
 	runPolo();
+	
+	return 0;
 }
 

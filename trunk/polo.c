@@ -16,11 +16,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "polo.h"
-
 #if (!defined(_WIN32) && !defined(__APPLE__))
 #include <GL/glx.h>
 #endif
+
+#include "polo.h"
 
 #ifndef M_PI
 #define M_PI           3.14159265358979323846
@@ -39,6 +39,8 @@
 // Definitions
 #define POLO_MOUSEBUTTON_NUM	3
 #define POLO_MAX_IMAGES			1024
+
+typedef void (*PoloSwapControl)(int value);
 
 typedef struct
 {
@@ -294,12 +296,22 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	}
 #endif
 	
-#ifdef GLX_SGI_swap_control
-	glXSwapIntervalSGI(1);
+#ifdef GLX_VERSION_1_4
+	{
+		PoloSwapControl swapControl;
+		swapControl = (PoloSwapControl) glXGetProcAddress("glXSwapIntervalSGI");
+		if (swapControl)
+			swapControl(1);
+	}
 #endif
 	
 #ifdef _WIN32
-/*	swapInterval(1);*/
+	{
+		PoloSwapControl swapControl;
+		swapControl = (PoloSwapControl) wglGetProcAddress("wglSwapInterval");
+		if (swapControl)
+			swapControl(1);
+	}
 #endif
 	
 	/* Configure OpenGL */
