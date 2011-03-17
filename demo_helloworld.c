@@ -1,4 +1,3 @@
-
 /**
  * libpolo hello world demo
  * Hello world program
@@ -27,7 +26,7 @@ void draw(void *userData)
 int main(int argc, char *argv[])
 {
 	/* Init polo */
-	initPolo(640, 480, 0, "Mouse Painter");
+	initPolo(640, 480, 0, "Hello world");
 	
 	/* Init variables */
 	setDrawCallback(draw);
