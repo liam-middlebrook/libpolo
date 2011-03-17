@@ -12,7 +12,7 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 
 * From the command line, enter
 
-  apt-get install freeglut3-dev
+  sudo apt-get install freeglut3-dev
 
 ===Mac OS X===
 
