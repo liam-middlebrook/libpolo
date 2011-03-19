@@ -124,6 +124,9 @@ static void resizeCallback(int width, int height)
 static void keyboardCallback(unsigned char key, int x, int y)
 {
 	poloState.key = key;
+	if (poloState.keyboardCallback)
+		poloState.keyboardCallback(poloState.userData,
+		                           poloState.key);
 }
 
 static void specialCallback(int key, int x, int y)
@@ -190,7 +193,13 @@ static void specialCallback(int key, int x, int y)
 		case GLUT_KEY_END:
 			poloState.key = POLO_END;
 			break;
+		default:
+			return;
 	}
+	
+	if (poloState.keyboardCallback)
+		poloState.keyboardCallback(poloState.userData,
+		                           poloState.key);
 }
 
 static void mouseButtonCallback(int button, int state, int x, int y)
