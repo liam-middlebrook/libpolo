@@ -1,4 +1,5 @@
 ==2011-03==
+* Fixed mouse coordinate error in user callback
 * Corrected font selection
 * Fixed comments
 * Fixed rounded rect border error
