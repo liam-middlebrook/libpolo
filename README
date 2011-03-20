@@ -5,7 +5,7 @@ libpolo is a lightweight graphics library for educational environments.
 It is aimed towards students learning the C and C++ language, and is very suitable for high school and first-year university courses. It is built as a simple wrapper around the GLUT library, providing a streamlined interface and full access to OpenGL. Its features are:
 
 * 2D primitives (point, line, rect, quad, triangle, circle and a rounded rect)
-* pen stroke and solid/gradient fill for all primitives
+* pen stroke and solid/gradient/texture fill for all primitives
 * texture uploading from BMP files (RGB, RGBA formats)
 * simple mouse and keyboard handling
 * RGB and HSV color spaces
