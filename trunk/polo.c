@@ -99,15 +99,18 @@ static PoloState poloState;
 /* Private callbacks */
 static void drawCallback()
 {
+	/* Configure OpenGL */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glTranslatef(-1.0, -1.0, 0.0);
 	glScalef(2.0 / glutGet(GLUT_WINDOW_WIDTH),
 			 2.0 / glutGet(GLUT_WINDOW_HEIGHT),
 			 1.0);
+	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
+	/* Call user callback */
 	if (poloState.drawCallback)
 		poloState.drawCallback(poloState.userData);
 	
@@ -117,6 +120,7 @@ static void drawCallback()
 static void resizeCallback(int width, int height)
 {
 	glViewport(0, 0, width, height);
+	
 	clearScreen();
 	updateScreen();
 	clearScreen();
@@ -125,6 +129,7 @@ static void resizeCallback(int width, int height)
 static void keyboardCallback(unsigned char key, int x, int y)
 {
 	poloState.key = key;
+	
 	if (poloState.keyboardCallback)
 		poloState.keyboardCallback(poloState.userData,
 		                           poloState.key);
@@ -203,6 +208,17 @@ static void specialCallback(int key, int x, int y)
 		                           poloState.key);
 }
 
+static void mouseMotionCallback(int x, int y)
+{
+	poloState.mouseX = x;
+	poloState.mouseY = glutGet(GLUT_WINDOW_HEIGHT) - y;
+	
+	if (poloState.mouseMotionCallback)
+		poloState.mouseMotionCallback(poloState.userData,
+									  poloState.mouseX,
+									  poloState.mouseY);
+}
+
 static void mouseButtonCallback(int button, int state, int x, int y)
 {
 	switch (button)
@@ -225,17 +241,7 @@ static void mouseButtonCallback(int button, int state, int x, int y)
 	else if (state == GLUT_UP)
 		poloState.mouseButtonState[button] = 0;
 	
-	if (poloState.mouseMotionCallback)
-		poloState.mouseMotionCallback(poloState.userData, x, y);
-}
-
-static void mouseMotionCallback(int x, int y)
-{
-	poloState.mouseX = x;
-	poloState.mouseY = glutGet(GLUT_WINDOW_HEIGHT) - y;
-	
-	if (poloState.mouseMotionCallback)
-		poloState.mouseMotionCallback(poloState.userData, x, y);
+	mouseMotionCallback(x, y);
 }
 
 static void timerCallback(int value)
@@ -289,8 +295,8 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutIdleFunc(drawCallback);
 	glutKeyboardFunc(keyboardCallback);
 	glutSpecialFunc(specialCallback);
-	glutMouseFunc(mouseButtonCallback);
 	glutMotionFunc(mouseMotionCallback);
+	glutMouseFunc(mouseButtonCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
 	
 	/* Configure freeglut */
