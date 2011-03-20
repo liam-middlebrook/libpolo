@@ -1,4 +1,7 @@
 ==2011-03==
+* Corrected font selection
+* Fixed comments
+* Fixed rounded rect border error
 * Fixed vertical sync on Windows
 * Fixed vertical sync on Linux
 * Fixed demos
