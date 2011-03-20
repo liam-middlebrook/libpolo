@@ -26,20 +26,20 @@
  *   and fill color (setFillColor() or setFillGradient()).
  *
  * Using images:
- * - Images must be in uncompressed BMP format, using 24-bit RGB or 32-bit RGBA.
+ * - Images must be in uncompressed BMP format, either 24-bit RGB or 32-bit RGBA.
  * - Make sure you called initPolo before loading images.
  * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
  *   If the image could not be loaded you get the value 0.
  * - Use drawImage() to draw an image to screen. The tint parameter lets you tint
- *   your image with a color or alpha. To just paint, use POLO_WHITE.
- * - Use freeImage() after you finished using an image.
- * - You can call setTexture() to texture the fill color. For drawing
- *   textures, make sure the width and height of your image is a power of 2.
+ *   your image with a color or alpha. To just paint, use tint color POLO_WHITE.
+ * - Use freeImage() after you finished using your image.
+ * - You can call setTexture() to fill drawing primitives with a texture.
+ *   Make sure the width and height of your image is a power of 2 when using this.
  *
  * Keyboard and mouse:
  * - You can use getKey(), getMouseX(), getMouseY() and getMouseButtonState()
  *   to query the keyboard and mouse. Use clearKey() to clear a read key.
- * - Keyboard codes are in UNICODE. Special keys are defined in enum PoloKeys.
+ * - Keyboard codes are in UNICODE. Special keys are defined in PoloKeys.
  *
  * Time:
  * - Use getTime() to get the number of seconds since the program started.

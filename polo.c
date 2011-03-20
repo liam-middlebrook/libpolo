@@ -36,7 +36,7 @@
 
 
 
-// Definitions
+/* Definitions */
 #define POLO_MOUSEBUTTON_NUM	3
 #define POLO_MAX_IMAGES			1024
 
@@ -119,6 +119,7 @@ static void resizeCallback(int width, int height)
 	glViewport(0, 0, width, height);
 	clearScreen();
 	updateScreen();
+	clearScreen();
 }
 
 static void keyboardCallback(unsigned char key, int x, int y)
@@ -267,8 +268,6 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 	/* Init glut */
 	glutInit(&argc, (char **)argv);
-	
-	/* Create glut window */
 	displayMode = GLUT_RGB | GLUT_DEPTH;
 #ifndef __APPLE__
 	displayMode |= GLUT_DOUBLE;
@@ -281,7 +280,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	
 	poloState.isInitialized = 1;
 	
-	/* Init run time (so it starts at 0 on all systems) */
+	/* Init glut run time (so it starts at 0 on all systems) */
 	getTime();
 	
 	/* Set internal callbacks */
@@ -294,10 +293,12 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	glutMotionFunc(mouseMotionCallback);
 	glutPassiveMotionFunc(mouseMotionCallback);
 	
+	/* Configure freeglut */
 #ifdef USE_FREEGLUT
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);	
 #endif
 	
+	/* Enable vertical video sync */
 #ifdef __APPLE__
 	{
 		const GLint sync = 1;
@@ -347,11 +348,11 @@ void exitPolo()
 	
 #ifdef USE_FREEGLUT
 	glutLeaveMainLoop();
+	
+	poloState.isInitialized = 0;
 #else
 	exit(0);
 #endif
-	
-	poloState.isInitialized = 0;
 }
 
 
@@ -410,7 +411,7 @@ Color getColorFromHSVA(float hue, float saturation, float value, float alpha)
 		
 		/* Sector 0 to 5 */
 		h *= 6.0;
-		/* Integer part of h (0,1,2,3,4,5 or 6) */
+		/* Integer part of h (0, 1, 2, 3, 4, 5 or 6) */
 		i = floor(h);
 		/* Factorial part of h (0 to 1) */
 		f = h - i;
@@ -496,6 +497,7 @@ void drawPoint(float x, float y)
 	if (!poloState.isInitialized)
 		return;
 	
+	/* Translate coordinates to pixel center */
 	glBegin(GL_POINTS);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x + 0.5, y + 0.5);
@@ -510,6 +512,7 @@ void drawLine(float x1, float y1, float x2, float y2)
 	x2 += (x2 < x1) ? -1.0 : 1.0;
 	y2 += (y2 < y1) ? -1.0 : 1.0;
 	
+	/* Translate coordinates to pixel center */
 	glBegin(GL_LINES);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x1 + 0.5, y1 + 0.5);
@@ -538,6 +541,7 @@ void drawRect(float x, float y, float width, float height)
 	glVertex2f(x, y + height);
 	glEnd();
 	
+	/* Translate coordinates to pixel center */
 	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
 	glVertex2f(x + 0.5, y + 0.5);
@@ -573,9 +577,9 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 		float xp, yp1, yp2;
 		
 		if (i < 90)
-			xp = edgeRadius - xr;
+			xp = edgeRadius - xr + 1.0;
 		else
-			xp = width - edgeRadius - xr;
+			xp = width - edgeRadius - xr - 1.0;
 		yp1 = -yr + edgeRadius;
 		yp2 = height + yr - edgeRadius;
 		
@@ -588,6 +592,7 @@ void drawRoundedRect(float x, float y, float width, float height, float edgeRadi
 	}
 	glEnd();
 	
+	/* Translate coordinates to pixel center */
 	glBegin(GL_LINE_LOOP);
 	setPoloColor(poloState.penColor);
 	for(i = 0; i < 360; i++)
@@ -729,7 +734,6 @@ void setTextFont(enum PoloFont font)
 			poloState.fontBaseLine = 4;
 			break;
 		case POLO_HELVETICA_18:
-		default:
 			poloState.font = GLUT_BITMAP_HELVETICA_18;
 			poloState.fontHeight = 23;
 			poloState.fontBaseLine = 5;
@@ -873,7 +877,7 @@ Image loadImage(const char *path)
 	
 	if (valid)
 	{
-		// OpenGL requires a textures of size 2 ^ m, 2 ^ n
+		/* OpenGL requires a textures of size 2 ^ m by 2 ^ n */
 		int textureWidth = getNextPowerOf2(width);
 		int textureHeight = getNextPowerOf2(abs(height));
 		
@@ -886,7 +890,7 @@ Image loadImage(const char *path)
 			
 			fseek(fp, pixelsOffset, SEEK_SET);
 			
-			// Read line by line from image
+			/* Read image line by line */
 			if (height >= 0)
 				for (y = 0; y < height; y++)
 					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
@@ -895,7 +899,6 @@ Image loadImage(const char *path)
 				for (y = -height - 1; y >= 0; y--)
 					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
 									  width * bytesPerPixel, 1, fp);
-			
 			
 			image = getFreeImage();
 			if (image)

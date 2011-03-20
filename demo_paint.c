@@ -41,7 +41,10 @@ void draw(void *userData)
 	if (isMouseButtonPressed(0))
 	{
 		if ((getMouseX() < 128) && (getMouseY() < 128))
-			d->tint = getColorFromHSVA(getMouseX() / 128, getMouseY() / 128, 1, BRUSH_ALPHA);
+			d->tint = getColorFromHSVA(getMouseX() / 128,
+									   getMouseY() / 128,
+									   1,
+									   BRUSH_ALPHA);
 		else
 			drawImage(getMouseX() - getImageWidth(d->brush) / 2,
 					  getMouseY() - getImageHeight(d->brush) / 2,
@@ -56,9 +59,9 @@ void draw(void *userData)
 	/* Draw frames per second and time display */
 	setPenColor(POLO_BLACK);
 	sprintf(buf, "FPS: %.3f", d->frame / (getTime() + 0.001));
-	drawText(10,//(TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
-		 getScreenHeight() - getTextDrawHeight(buf) - 10,
-	         buf);
+	drawText((TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
+			 getScreenHeight() - getTextDrawHeight(buf) - 10,
+			 buf);
 	
 	/* Increment frame number */
 	d->frame++;
@@ -67,7 +70,9 @@ void draw(void *userData)
 	for (x = 0; x < 128; x++)
 		for (y = 0; y < 128; y++)
 		{
-			setPenColor(getColorFromHSV(x / 128.0, y / 128.0, 1.0));
+			setPenColor(getColorFromHSV(x / 128.0,
+										y / 128.0,
+										1.0));
 			drawPoint(x, y);
 		}
 }
