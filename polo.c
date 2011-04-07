@@ -1,4 +1,3 @@
-
 /**
  * libpolo
  * Lightweight graphics library for educational environments
@@ -675,7 +674,7 @@ void drawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float 
 
 void drawCircle(float x, float y, float radius)
 {
-	return drawRoundedRect(x, y, radius, radius, radius / 2.0);
+	return drawRoundedRect(x - radius, y - radius, 2.0 * radius, 2.0 * radius, radius);
 }
 
 void clearScreen()
