@@ -876,8 +876,7 @@ Image loadImage(const char *path)
 	
 	if ((width > 4096) || (height > 4096) || (height < -4096) ||
 		(numberOfPlanes != 1) ||
-		((bytesPerPixel != 3) && (bytesPerPixel != 4)) ||
-	    (compression != 0))
+		((bytesPerPixel != 3) && (bytesPerPixel != 4)))
 		valid = 0;
 	
 	if (valid)
