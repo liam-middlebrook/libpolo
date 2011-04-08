@@ -240,8 +240,8 @@ static void mouseButtonCallback(int button, int state, int x, int y)
 	else if (state == GLUT_UP)
 		poloState.mouseButtonState[button] = 0;
 	
-	if (poloState.mouseMotionCallback)
-		poloState.mouseMotionCallback(poloState.userData,
+	if (poloState.mouseButtonCallback)
+		poloState.mouseButtonCallback(poloState.userData,
 									  button,
 									  poloState.mouseButtonState[button]);
 	
