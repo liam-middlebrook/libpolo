@@ -240,6 +240,11 @@ static void mouseButtonCallback(int button, int state, int x, int y)
 	else if (state == GLUT_UP)
 		poloState.mouseButtonState[button] = 0;
 	
+	if (poloState.mouseMotionCallback)
+		poloState.mouseMotionCallback(poloState.userData,
+									  button,
+									  poloState.mouseButtonState[button]);
+	
 	mouseMotionCallback(x, y);
 }
 
@@ -314,7 +319,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 #ifdef GLX_VERSION_1_4
 	{
 		PoloSwapControl swapControl;
-		swapControl = (PoloSwapControl) glXGetProcAddress("glXSwapIntervalSGI");
+		swapControl = (PoloSwapControl) glXGetProcAddress((const GLubyte *) "glXSwapIntervalSGI");
 		if (swapControl)
 			swapControl(1);
 	}
@@ -323,7 +328,7 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 #ifdef _WIN32
 	{
 		PoloSwapControl swapControl;
-		swapControl = (PoloSwapControl) wglGetProcAddress("wglSwapInterval");
+		swapControl = (PoloSwapControl) wglGetProcAddress((const GLubyte *) "wglSwapInterval");
 		if (swapControl)
 			swapControl(1);
 	}
