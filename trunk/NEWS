@@ -1,4 +1,5 @@
 ==2011-04==
+* Fixed mouse button callback
 * Fixed BMP compression madness
 * Fixed circles
 
