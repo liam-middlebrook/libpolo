@@ -1,4 +1,3 @@
-
 /**
  * libpolo
  * Lightweight graphics library for educational environments
@@ -218,7 +217,7 @@ void clearKey();
 
 // Mouse
 void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, int y));
-void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int state));
+void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int pressed));
 float getMouseX();
 float getMouseY();
 int isMouseButtonPressed(int buttonIndex);
