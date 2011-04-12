@@ -1058,7 +1058,7 @@ void setMouseMotionCallback(void (*mouseMotionCallback)(void *userData, int x, i
 	poloState.mouseMotionCallback = mouseMotionCallback;
 }
 
-void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int state))
+void setMouseButtonCallback(void (*mouseButtonCallback)(void *userData, int button, int pressed))
 {
 	poloState.mouseButtonCallback = mouseButtonCallback;
 }
