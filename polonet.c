@@ -158,7 +158,10 @@ PolonetState polonetGetState()
 	struct timeval nowait;
 	
 	if (isError)
+	{
+		isError = 0;
 		return POLONET_ERROR;
+	}
 	
 	/* Check server connection */
 	
