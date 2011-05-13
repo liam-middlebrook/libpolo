@@ -14,8 +14,8 @@
  *
  * Usage as a client:
  * - Call polonetConnect() to connect to a host and port. This returns
- *   a PolonetConnection identifier. If the identifier is 0, the
- *   connection could not be established
+ *   a PolonetConn identifier. If the identifier is 0, the connection
+ *   could not be established
  * - Call polonetGetState() to determine the state of a connection:
  *   - While the connection is being established, the state is POLONET_PENDING
  *   - While a connection is established, the state is POLONET_CONNECTED
@@ -32,9 +32,9 @@
  * Usage as a server:
  * - Call polonetListen() to start listening to connection request on a port.
  * - Call polonetStopListening() to stop listening to connection requests.
- * - To determine if there is an incoming connection, call
- *   polonetGetConnection().
- * - You can use
+ * - To get the next incoming connection, call polonetGetConnection().
+ *   If there is no incoming connection, 0 is returned.
+ * - You can use the client functions to handle the incoming connection.
  */
 
 #ifndef _LIBPOLONET_H
@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-typedef int PolonetConnection;
+typedef int PolonetConn;
 
 typedef enum
 {
@@ -57,18 +57,14 @@ typedef enum
 /* Server functions */
 void polonetListen(unsigned short port);
 void polonetStopListening();
-
-PolonetConnection polonetGetConnection();
+PolonetConn polonetGetConnection();
 
 /* Client functions */
-
-void polonetConnect(char *hostname, unsigned short port);
-void polonetClose();
-
-PolonetState polonetGetState();
-
-int polonetSend(char *buffer, const int bufferSize);
-int polonetReceive(char *buffer, const int bufferSize);
+PolonetConn polonetConnect(char *hostname, unsigned short port);
+void polonetClose(PolonetConn conn);
+PolonetState polonetGetState(PolonetConn conn);
+int polonetSend(PolonetConn conn, char *buffer, const int bufferSize);
+int polonetReceive(PolonetConn conn, char *buffer, const int bufferSize);
 
 #ifdef __cplusplus
 }
