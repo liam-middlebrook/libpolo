@@ -20,7 +20,7 @@
 #endif
 
 #ifndef FIONREAD
-# include <sys/filio.h> /* Solaris 2 puts it here */
+#include <sys/filio.h> /* Solaris 2 puts it here */
 #endif
 
 #include <stdio.h>
