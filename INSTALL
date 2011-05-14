@@ -1,6 +1,8 @@
 =libpolo installation instructions=
 
-Copyright 2011 by Marc S. Ressl, mressl@gmail.com
+Copyright 2011 by
+Marc S. Ressl, mressl@gmail.com
+Jorge Prendes, jorge.prendes@gmail.com
 
 
 
@@ -39,6 +41,8 @@ At the command line, type:
   gcc -o demo_helloworld -l glut -l GLU polo.c demo_helloworld.c
   gcc -o demo_paint -l glut -l GLU polo.c demo_paint.c
   gcc -o demo_3d -l glut -l GLU polo.c demo_3d.c
+  gcc -o demo_netclient polo.c demo_3d.c
+  gcc -o demo_netserver GLU polo.c demo_3d.c
 
 ==Mac OS X==
 
@@ -47,13 +51,15 @@ At the command line, type:
   gcc -o demo_helloworld -framework GLUT -framework OpenGL polo.c demo_helloworld.c
   gcc -o demo_paint -framework GLUT -framework OpenGL polo.c demo_paint.c
   gcc -o demo_3d -framework GLUT -framework OpenGL polo.c demo_3d.c
-  
+  gcc -o demo_netclient polo.c demo_3d.c
+  gcc -o demo_netserver GLU polo.c demo_3d.c
+
 ==Microsoft Visual Studio 2008==
 
 * Create a new project
 * Choose "Win32 Console Application"
 * Choose "Empty project"
-* Put the files polo.c and demo_helloworld.c (or demo_paint.c, demo_3d.c for the other demos) in the project
+* Put the files polo.c and demo_helloworld.c (or demo_paint.c, demo_3d.c, etc. for the other demos) in the project
 * Go to Project > Properties
 * In the Configuration list box, select "All Configurations"
 * In C/C++ > General > Additional Include Directories, add the path to your include folder
