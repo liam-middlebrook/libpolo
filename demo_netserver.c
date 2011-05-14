@@ -72,7 +72,11 @@ int main(int argc, char *argv[])
 		
 		/* Wait for the client to send us something */
 		if (!getData(conn, buffer, sizeof(buffer)))
+		{
+			/* Always close the connection */
+			closeConnection(conn);
 			continue;
+		}
 		
 		/* We ignore what the client sends,
 		   and always return the same response */
