@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	int bytesReceived;
 	
 	/* Open the connection */
-	if (!(conn = openConnection(HOSTNAME, 80)))
+	if (!(conn = openConnection(HOSTNAME, 8180)))
 	{
 		printf("Couldn't connect to " HOSTNAME ".\n");
 		return 1;
@@ -67,10 +67,13 @@ int main(int argc, char *argv[])
 	
 	if (!isConnected(conn))
 	{
-		printf("Disconnected from " HOSTNAME ".\n");
+		/* Always close open connections */
+		closeConnection(conn);
+		
+		printf("Connection refused from " HOSTNAME ".\n");
 		return 1;
 	}
-	
+
 	/* Send the GET command */
 	sendData(conn, getCommand, strlen(getCommand));
 	
