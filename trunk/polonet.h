@@ -13,14 +13,13 @@
  *
  * Usage as a client:
  * - Call openConnection() to connect to a host. This returns a
- *   PolonetConn identifier. If the identifier is 0, the connection
- *   could not be established
+ *   PolonetConn identifier. If the connection could not be established,
+ *   the identifier is 0.
  *
  * Usage as a server:
  * - Call startListening() to start listening to connections on a port.
  * - getAvailableConnection() gets the next available incoming connection.
  *   If there is no incoming connection, it returns 0.
- * - You can use the client functions to handle the incoming connection.
  *
  * Managing a connection:
  * - isPending() determines if a connection is being established.
@@ -30,7 +29,7 @@
  * - Call receiveData() to receive bytes from a connection. It returns
  *   the number of bytes received.
  * - Call closeConnection() to close a connection. You should always
- *   close connections you received from openConnection or
+ *   close connections you receive from openConnection or
  *   getAvailableConnection().
  * - Note: all calls are non-blocking.
  * - Note: there might be data left for reading, even though a
