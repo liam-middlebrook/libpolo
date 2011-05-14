@@ -46,25 +46,20 @@ extern "C" {
 
 typedef int PolonetConn;
 
-typedef enum
-{
-	POLONET_PENDING,
-	POLONET_CONNECTED,
-	POLONET_DISCONNECTED,
-	POLONET_ERROR,
-} PolonetState;
-
 /* Server functions */
-void polonetListen(unsigned short port);
-void polonetStopListening();
-PolonetConn polonetGetConnection();
+int startListening(unsigned short port);
+void stopListening();
+PolonetConn getAvailableConnection();
 
 /* Client functions */
-PolonetConn polonetConnect(char *hostname, unsigned short port);
-void polonetClose(PolonetConn conn);
-PolonetState polonetGetState(PolonetConn conn);
-int polonetSend(PolonetConn conn, char *buffer, const int bufferSize);
-int polonetReceive(PolonetConn conn, char *buffer, const int bufferSize);
+PolonetConn openConnection(char *hostname, unsigned short port);
+
+/* Connection functions */
+int isPending(PolonetConn conn);
+int isConnected(PolonetConn conn);
+int sendData(PolonetConn conn, char *buffer, const int bufferSize);
+int receiveData(PolonetConn conn, char *buffer, const int bufferSize);
+void closeConnection(PolonetConn conn);
 
 #ifdef __cplusplus
 }
