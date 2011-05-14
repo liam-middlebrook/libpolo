@@ -1,6 +1,6 @@
 /**
  * libpolonet
- * Lightweight network module for educational environments
+ * Lightweight TCP/IP network module for educational environments
  * (C) 2011 by the libpolo team.
  *     Marc S. Ressl (mressl@itba.edu.ar)
  *     Jorge Prendes (jprendes@itba.edu.ar)
@@ -9,32 +9,30 @@
  */
 
 /*
- * PoloNet manages TCP/IP connections.
- * It is capable of making and receiving connections.
+ * Polonet is capable of making and receiving TCP/IP connections.
  *
  * Usage as a client:
- * - Call polonetConnect() to connect to a host and port. This returns
- *   a PolonetConn identifier. If the identifier is 0, the connection
+ * - Call openConnection() to connect to a host. This returns a
+ *   PolonetConn identifier. If the identifier is 0, the connection
  *   could not be established
- * - Call polonetGetState() to determine the state of a connection:
- *   - While the connection is being established, the state is POLONET_PENDING
- *   - While a connection is established, the state is POLONET_CONNECTED
- *   - If the connection was closed and there are no bytes to be sent
- *     or to be received, the state is POLONET_DISCONNECTED
- *   - If there was an error, the state is POLONET_ERROR
- * - To send bytes to a connection, call polonetSend(). It returns
- *   the number of bytes sent.
- * - To receive bytes from a conneciton, call polonetReceive(). It returns
- *   the number of bytes received.
- * - To close a connection, call polonetClose()
- * - Note: all calls are non-blocking
  *
  * Usage as a server:
- * - Call polonetListen() to start listening to connection request on a port.
- * - Call polonetStopListening() to stop listening to connection requests.
- * - To get the next incoming connection, call polonetGetConnection().
- *   If there is no incoming connection, 0 is returned.
+ * - Call startListening() to start listening to connections on a port.
+ * - getAvailableConnection() gets the next available incoming connection.
+ *   If there is no incoming connection, it returns 0.
  * - You can use the client functions to handle the incoming connection.
+ *
+ * Managing a connection:
+ * - isPending() determines if a connection is being established.
+ * - isConnected() determines if a connection is established.
+ * - Call sendData() to send bytes to a connection. It returns
+ *   the number of bytes sent.
+ * - Call receiveData() to receive bytes from a connection. It returns
+ *   the number of bytes received.
+ * - Call closeConnection() to close a connection
+ * - Note: all calls are non-blocking
+ * - Note: notice there might be data left for reading, even though a
+ *   connection is closed.
  */
 
 #ifndef _LIBPOLONET_H
@@ -46,13 +44,13 @@ extern "C" {
 
 typedef int PolonetConn;
 
+/* Client functions */
+PolonetConn openConnection(char *hostname, unsigned short port);
+
 /* Server functions */
 int startListening(unsigned short port);
 void stopListening();
 PolonetConn getAvailableConnection();
-
-/* Client functions */
-PolonetConn openConnection(char *hostname, unsigned short port);
 
 /* Connection functions */
 int isPending(PolonetConn conn);
@@ -66,4 +64,3 @@ void closeConnection(PolonetConn conn);
 #endif
 
 #endif
-
