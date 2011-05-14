@@ -29,9 +29,11 @@
  *   the number of bytes sent.
  * - Call receiveData() to receive bytes from a connection. It returns
  *   the number of bytes received.
- * - Call closeConnection() to close a connection
- * - Note: all calls are non-blocking
- * - Note: notice there might be data left for reading, even though a
+ * - Call closeConnection() to close a connection. You should always
+ *   close connections you received from openConnection or
+ *   getAvailableConnection().
+ * - Note: all calls are non-blocking.
+ * - Note: there might be data left for reading, even though a
  *   connection is closed.
  */
 

@@ -13,9 +13,14 @@
 #else
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/ioctl.h> /* for FIONREAD (sigh) */
 #include <netinet/in.h>
 #include <netdb.h>
 #include <fcntl.h>
+#endif
+
+#ifndef FIONREAD
+# include <sys/filio.h> /* Solaris 2 puts it here */
 #endif
 
 #include <stdio.h>
@@ -108,10 +113,16 @@ int startListening(unsigned short port)
 	sin.sin_port = htons(port);
 	
 	if (bind(fdserver, (struct sockaddr *) &sin, sizeof(sin)) == -1)
+	{
+		polonetCloseSocket(fdserver);
 		return 0;
+	}
 	
 	if (listen(fdserver, 100) == -1)
+	{
+		polonetCloseSocket(fdserver);
 		return 0;
+	}
 	
 	return 1;
 }
@@ -168,13 +179,6 @@ PolonetConn openConnection(char *hostname, unsigned short port)
 	
 	connect(fd, (struct sockaddr *) &sin, sizeof(sin));
 	
-#ifdef WIN32
-	if (WSAGetLastError() != WSAEWOULDBLOCK)
-	{
-		polonetCloseSocket(fd);
-		return POLONET_ERROR;
-	}
-#endif
 	return fd + 1;
 }
 
@@ -199,12 +203,12 @@ int isPending(PolonetConn conn)
 	if (select(fd + 1, &fdsRead, &fdsWrite, &fdsExcept, &nowait) == -1)
 		return 0;
 	
-	/* Not pending on (read | write) */
+	/* Not pending on (fdsRead | fdsWrite) */
 	if (FD_ISSET(fd, &fdsRead))
 		return 0;
 	if (FD_ISSET(fd, &fdsWrite))
 		return 0;
-	/* Not pending on exception */	
+	/* Not pending on fdsException */	
 	if (FD_ISSET(fd, &fdsExcept))
 		return 0;
 	
@@ -232,10 +236,23 @@ int isConnected(PolonetConn conn)
 	if (select(fd + 1, &fdsRead, &fdsWrite, &fdsExcept, &nowait) == -1)
 		return 0;
 	
-	/* Disconnected on !write */
+	/* Disconnected if fdsRead but no bytes available for reading */
+	if (FD_ISSET(fd, &fdsRead))
+	{
+		int bytesAvailable;
+#ifdef WIN32
+		if (ioctlsocket(fd, FIONREAD, &bytesAvailable) == -1)
+#else
+		if (ioctl(fd, FIONREAD, &bytesAvailable) == -1)
+#endif
+			return 0;
+		if (bytesAvailable <= 0)
+			return 0;
+	}
+	/* Disconnected on !fdsWrite */
 	if (!FD_ISSET(fd, &fdsWrite))
 		return 0;
-	/* Disconnected on exception */
+	/* Disconnected on fdsException */
 	if (FD_ISSET(fd, &fdsExcept))
 		return 0;
 	
@@ -276,4 +293,3 @@ void closeConnection(PolonetConn conn)
 	
 	polonetCloseSocket(fd);
 }
-

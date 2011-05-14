@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 		   If there is no connection, wait 10 milliseconds */
 		while (!(conn = getAvailableConnection()))
 			usleep(10000);
-
+		
 		printf("Connected.\n");
 		
 		/* Wait for the client to send us something */
@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
 		   and always return the same response */
 		sendData(conn, serverResponse, strlen(serverResponse));
 		
+		/* Always close open connections */
 		closeConnection(conn);
 	}
 	
