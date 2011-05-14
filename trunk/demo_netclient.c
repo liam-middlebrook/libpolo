@@ -1,55 +1,86 @@
 
 /**
- * libpolonet demo
- * Simple connection demo
+ * libpolonet client demo
+ * Simple client demo
  * (C) 2011 by the libpolo team.
  *     Marc S. Ressl (mressl@itba.edu.ar)
+ *     Jorge Prendes (jprendes@itba.edu.ar)
  * Released under the GPL
  */
 
 /*
  * Description:
  *
- * This demo attempts to download the main page of http://ik.itba.edu.ar
+ * This demo attempts to download the main page of http://www.google.com
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "polonet.h"
 
-int main(int argc, char *argv[])
+#define HOSTNAME "www.google.com"
+
+char getCommand[] =
+"GET / HTTP/1.1\n"
+"Host:" HOSTNAME "\n"
+"\n";
+
+/* Convenience method to receive data */
+int getData(PolonetConn conn, char *buffer, int buffersize)
 {
-	PolonetState state;
-	char *command = "GET / HTTP/1.1\nHost:ik.itba.edu.ar\n\n";
-	char buffer[256];
-	int bytesSent;
 	int bytesReceived;
 	
-	/* Open a connection */
-	polonetOpenClient("ik.itba.edu.ar", 80);
-	
-	/* Wait for connection establishment */
-	while((state = polonetGetState()) == POLONET_PENDING)
-		usleep(10000); /* Wait 10 ms */
-	
-	if (state != POLONET_CONNECTED)
+	while (isConnected(conn))
 	{
-		printf("Disconnected.\n");
+		if (bytesReceived = receiveData(conn, buffer, buffersize))
+			return bytesReceived;
+		
+		usleep(10000);
+	}
+	
+	/* Just in case there is data left */ 
+	if (bytesReceived = receiveData(conn, buffer, buffersize))
+		return bytesReceived;
+	
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	PolonetConn conn;
+	char buffer[256];
+	int bytesReceived;
+	
+	/* Open the connection */
+	if (!(conn = openConnection(HOSTNAME, 80)))
+	{
+		printf("Couldn't connect to " HOSTNAME ".\n");
 		return 1;
 	}
 	
-	/* Send the command */
-	polonetSend(command, strlen(command));
+	/* Wait for the connection establishment.
+	   If the connection is pending, wait 10 milliseconds */
+	while (isPending(conn))
+		usleep(10000);
+	
+	if (!isConnected(conn))
+	{
+		printf("Disconnected from " HOSTNAME ".\n");
+		return 1;
+	}
+	
+	/* Send the GET command */
+	sendData(conn, getCommand, strlen(getCommand));
 	
 	/* Receive the response */
-	while(polonetGetState() == POLONET_CONNECTED)
+	while (bytesReceived = getData(conn, buffer, sizeof(buffer) - 1))
 	{
-		int bytesReceived = polonetReceive(buffer, sizeof(buffer));
-		if (bytesReceived)
-			fwrite(buffer, bytesReceived, 1, stdout);
-		else
-			usleep(10000); /* Wait 10 ms */
+		buffer[bytesReceived] = '\0';
+		printf("%s", buffer);
 	}
+	
+	closeConnection(conn);
 	
 	return 0;
 }

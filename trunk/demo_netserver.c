@@ -4,6 +4,7 @@
  * Simple server demo
  * (C) 2011 by the libpolo team.
  *     Marc S. Ressl (mressl@itba.edu.ar)
+ *     Jorge Prendes (jprendes@itba.edu.ar)
  * Released under the GPL
  */
 
@@ -11,71 +12,76 @@
  * Description:
  *
  * Responds to port 8080, serves a simple webpage.
+ *
+ * Test with this URL on your browser: http://localhost:8080
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "polonet.h"
 
-int main(int argc, char *argv[])
-{
-	PolonetState state;
-	char *response =
+char serverResponse[] =
 "HTTP/1.1 200 OK\n"
 "Server: libpolonet server demo/1.0 (Unknown)\n"
 "Content-Length: 45\n"
 "Connection: close\n"
 "Content-Type: text/html; charset=UTF-8\n"
 "\n"
-"<html><body>libpolonet says hi!</body></html>\n";
-	
-	char buffer[256];
-	int bytesSent;
+"<html><body><h1>libpolonet says hi!</h1></body></html>\n";
+
+/* Convenience method to receive data */
+int getData(PolonetConn conn, char *buffer, int buffersize)
+{
 	int bytesReceived;
 	
-	/* Servers always implement a listen loop */
+	while (isConnected(conn))
+	{
+		if (bytesReceived = receiveData(conn, buffer, buffersize))
+			return bytesReceived;
+		
+		usleep(10000);
+	}
+	
+	/* Just in case there is data left */ 
+	if (bytesReceived = receiveData(conn, buffer, buffersize))
+		return bytesReceived;
+	
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	/* Start listening on the port */
+	startListening(8080);
+	
+	printf("Server started.\n");
+	
+	/* Well-behaved servers always keep listening */
 	while (1)
 	{
-		state = polonetOpenServer(8080);
+		PolonetConn conn;
+		char buffer[256];
 		
-		while((state = polonetGetState()) == POLONET_PENDING)
-			usleep(100000);
-		
-		if (state == POLONET_ERROR)
-			break;
-		else if (state != POLONET_CONNECTED)
-			continue;
-		
+		/* Wait for an incoming connection.
+		   If there is no connection, wait 10 milliseconds */
+		while (!(conn = getAvailableConnection()))
+			usleep(10000);
+
 		printf("Connected.\n");
 		
 		/* Wait for the client to send us something */
-		int a;
-		while((a = polonetReceive(buffer, sizeof(buffer) - 1, &bytesReceived)
-			  ) == POLONET_CONNECTED)
-		{
-			if (!bytesReceived)
-				usleep(100000);
-			else
-				break;
-		}
-
-		printf("%d\n", a);
-
-		/*
-		 * We ignore the commands the clients sends to us,
-		 * and send the same response always.
-		 */
+		if (!getData(conn, buffer, sizeof(buffer)))
+			continue;
 		
-		polonetSend(response, sizeof(response) - 1, &bytesSent);
+		/* We ignore what the client sends,
+		   and always return the same response */
+		sendData(conn, serverResponse, strlen(serverResponse));
 		
-		sleep(1);
-
-		polonetClose();
+		closeConnection(conn);
 	}
 	
-	printf("Error.\n");
-	
-	polonetClose();
+	stopListening();
 	
 	return 0;
 }
