@@ -1,6 +1,6 @@
 /**
  * libpolonet
- * Lightweight network module for educational environments
+ * Lightweight TCP/IP network module for educational environments
  * (C) 2011 by the libpolo team.
  *     Marc S. Ressl (mressl@itba.edu.ar)
  *     Jorge Prendes (jprendes@itba.edu.ar)
