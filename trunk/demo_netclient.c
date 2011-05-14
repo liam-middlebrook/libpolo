@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	int bytesReceived;
 	
 	/* Open the connection */
-	if (!(conn = openConnection(HOSTNAME, 8180)))
+	if (!(conn = openConnection(HOSTNAME, 80)))
 	{
 		printf("Couldn't connect to " HOSTNAME ".\n");
 		return 1;
