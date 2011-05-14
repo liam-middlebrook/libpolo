@@ -1,3 +1,7 @@
+==2011-05==
+* Fixed Mac OS X libpolonet compatibility
+* Added libpolonet
+
 ==2011-04==
 * Fixed mouse button callback
 * Fixed BMP compression madness

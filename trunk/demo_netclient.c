@@ -36,6 +36,7 @@ int getData(PolonetConn conn, char *buffer, int buffersize)
 		if (bytesReceived = receiveData(conn, buffer, buffersize))
 			return bytesReceived;
 		
+		/* Wait 10 milliseconds, so the CPU is not clogged */
 		usleep(10000);
 	}
 	

@@ -12,6 +12,7 @@
 #include <winsock.h>
 #else
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <fcntl.h>

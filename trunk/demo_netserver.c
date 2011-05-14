@@ -24,7 +24,6 @@
 char serverResponse[] =
 "HTTP/1.1 200 OK\n"
 "Server: libpolonet server demo/1.0 (Unknown)\n"
-"Content-Length: 45\n"
 "Connection: close\n"
 "Content-Type: text/html; charset=UTF-8\n"
 "\n"
@@ -40,6 +39,7 @@ int getData(PolonetConn conn, char *buffer, int buffersize)
 		if (bytesReceived = receiveData(conn, buffer, buffersize))
 			return bytesReceived;
 		
+		/* Wait 10 milliseconds, so the CPU is not clogged */
 		usleep(10000);
 	}
 	
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	
 	printf("Server started.\n");
 	
-	/* Well-behaved servers always keep listening */
+	/* Well-behaved servers keep listening */
 	while (1)
 	{
 		PolonetConn conn;
