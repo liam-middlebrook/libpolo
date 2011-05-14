@@ -22,8 +22,6 @@
 
 #include "polonet.h"
 
-#include <errno.h>
-
 static int fdserver = -1;
 
 /*
@@ -111,7 +109,7 @@ int startListening(unsigned short port)
 	if (bind(fdserver, (struct sockaddr *) &sin, sizeof(sin)) == -1)
 		return 0;
 	
-	if (listen(fdserver, 0) == -1)
+	if (listen(fdserver, 100) == -1)
 		return 0;
 	
 	return 1;
