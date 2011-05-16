@@ -40,10 +40,6 @@ int getData(PolonetConn conn, char *buffer, int buffersize)
 		usleep(10000);
 	}
 	
-	/* Just in case there is data left */ 
-	if (bytesReceived = receiveData(conn, buffer, buffersize))
-		return bytesReceived;
-	
 	return 0;
 }
 
@@ -73,7 +69,7 @@ int main(int argc, char *argv[])
 		printf("Connection refused from " HOSTNAME ".\n");
 		return 1;
 	}
-
+	
 	/* Send the GET command */
 	sendData(conn, getCommand, strlen(getCommand));
 	
