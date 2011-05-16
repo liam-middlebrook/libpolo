@@ -23,9 +23,10 @@
 
 char serverResponse[] =
 "HTTP/1.1 200 OK\n"
-"Server: libpolonet server demo/1.0 (Unknown)\n"
-"Connection: close\n"
-"Content-Type: text/html; charset=UTF-8\n"
+"Server:libpolonet server demo/1.0 (Unknown)\n"
+"Connection:close\n"
+"Content-Type:text/html; charset=UTF-8\n"
+"Content-Length:55\n"
 "\n"
 "<html><body><h1>libpolonet says hi!</h1></body></html>\n";
 
