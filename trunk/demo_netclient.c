@@ -1,4 +1,3 @@
-
 /**
  * libpolonet client demo
  * Simple client demo

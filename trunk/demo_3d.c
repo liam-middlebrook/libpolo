@@ -1,4 +1,3 @@
-
 /**
  * libpolo 3D demo
  * Simple 3D demo (integration with OpenGL)

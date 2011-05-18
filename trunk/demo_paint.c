@@ -1,4 +1,3 @@
-
 /**
  * libpolo paint demo
  * Simple paint program
