@@ -23,7 +23,7 @@
 
 char getCommand[] =
 "GET / HTTP/1.1\n"
-"Host:" HOSTNAME "\n"
+"Host:" CONN_HOSTNAME "\n"
 "\n";
 
 /* Blocking receiveData. It waits til data is received. */
@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
 	PolonetConn conn;
 	char buffer[256];
 	int bytesReceived;
-	returnValue = 1;
+	int returnValue = 1;
 	
 	/* Open the connection */
-	if ((conn = openConnection(HOSTNAME, 80)))
+	if ((conn = openConnection(CONN_HOSTNAME, 80)))
 	{
 		/* Wait for the connection establishment.
 		   If the connection is pending, wait 10 milliseconds */
@@ -69,15 +69,18 @@ int main(int argc, char *argv[])
 				buffer[bytesReceived] = '\0';
 				printf("%s", buffer);
 			}
+			
+			/* Signal success */
+			returnValue = 0;
 		}
 		else
-			printf("Connection refused from " HOSTNAME ".\n");
+			printf("Connection refused from " CONN_HOSTNAME ".\n");
 		
 		/* Always close an open connection! */
 		closeConnection(conn);
 	}
 	else
-		printf("Couldn't connect to " HOSTNAME ".\n");
+		printf("Couldn't connect to " CONN_HOSTNAME ".\n");
 	
 	return returnValue;
 }

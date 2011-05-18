@@ -20,7 +20,7 @@
 
 #include "polonet.h"
 
-#define CONN_PORT 80
+#define CONN_PORT 8080
 
 char serverResponse[] =
 "HTTP/1.1 200 OK\n"
@@ -52,38 +52,40 @@ int main(int argc, char *argv[])
 {
 	/* Start listening on the port */
 	if (!startListening(CONN_PORT))
-		printf("Could not listening port %d.\n", CONN_PORT);
-	
-	printf("Server started.\n");
-	
-	/* Well-behaved servers always keep listening */
-	while (1)
+		printf("Cannot listen on port %d.\n", CONN_PORT);
+	else
 	{
-		PolonetConn conn;
-		char buffer[256];
+		printf("Server started.\n");
 		
-		/* Wait for an incoming connection.
-		   If there is no connection, wait 10 milliseconds */
-		while (!(conn = getAvailableConnection()))
-			usleep(10000);
-		
-		/* Wait for the connection establishment.
-		 If the connection is pending, wait 10 milliseconds */
-		while (isPending(conn))
-			usleep(10000);
-		
-		printf("Connected.\n");
-		
-		/* Wait for the client to send us something */
-		if (getData(conn, buffer, sizeof(buffer)))
+		/* Well-behaved servers always keep listening */
+		while (1)
 		{
-			/* We ignore what the client sends,
-			   and always return the same response */
-			sendData(conn, serverResponse, strlen(serverResponse));
+			PolonetConn conn;
+			char buffer[256];
+			
+			/* Wait for an incoming connection.
+			   If there is no connection, wait 10 milliseconds */
+			while (!(conn = getAvailableConnection()))
+				usleep(10000);
+			
+			/* Wait for the connection establishment.
+			 If the connection is pending, wait 10 milliseconds */
+			while (isPending(conn))
+				usleep(10000);
+			
+			printf("Connected.\n");
+			
+			/* Wait for the client to send us something */
+			if (getData(conn, buffer, sizeof(buffer)))
+			{
+				/* We ignore what the client sends,
+				   and always return the same response */
+				sendData(conn, serverResponse, strlen(serverResponse));
+			}
+			
+			/* Always close an open connection! */
+			closeConnection(conn);
 		}
-		
-		/* Always close an open connection! */
-		closeConnection(conn);
 	}
 	
 	stopListening();
