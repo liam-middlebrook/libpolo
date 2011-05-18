@@ -11,11 +11,13 @@
 #ifdef WIN32
 #include <winsock.h>
 #else
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/ioctl.h> /* for FIONREAD (sigh) */
 #include <netinet/in.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <fcntl.h>
 #endif
 
@@ -137,7 +139,6 @@ PolonetConn getAvailableConnection()
 {
 	fd_set fdsRead;
 	struct timeval nowait;
-	int fd;
 	
 	if (fdserver == -1)
 		return 0;

@@ -1,4 +1,7 @@
 ==2011-05==
+* Fixed network examples
+* Fixed polonet documentation
+* Confirmed Windows libpolonet compatibility
 * Fixed Mac OS X libpolonet compatibility
 * Added libpolonet
 

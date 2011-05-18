@@ -21,6 +21,8 @@
 
 #include "polonet.h"
 
+#define CONN_PORT 80
+
 char serverResponse[] =
 "HTTP/1.1 200 OK\n"
 "Server:libpolonet server demo/1.0 (Unknown)\n"
@@ -30,13 +32,13 @@ char serverResponse[] =
 "\n"
 "<html><body><h1>libpolonet says hi!</h1></body></html>\n";
 
-/* Convenience method to receive data */
+/* Blocking receiveData. It waits til data is received. */
 int getData(PolonetConn conn, char *buffer, int buffersize)
 {
-	int bytesReceived;
-	
 	while (isConnected(conn))
 	{
+		int bytesReceived;
+		
 		if (bytesReceived = receiveData(conn, buffer, buffersize))
 			return bytesReceived;
 		
@@ -50,11 +52,12 @@ int getData(PolonetConn conn, char *buffer, int buffersize)
 int main(int argc, char *argv[])
 {
 	/* Start listening on the port */
-	startListening(8080);
+	if (!startListening(CONN_PORT))
+		printf("Could not listening port %d.\n", CONN_PORT);
 	
 	printf("Server started.\n");
 	
-	/* Well-behaved servers keep listening */
+	/* Well-behaved servers always keep listening */
 	while (1)
 	{
 		PolonetConn conn;
@@ -65,21 +68,22 @@ int main(int argc, char *argv[])
 		while (!(conn = getAvailableConnection()))
 			usleep(10000);
 		
+		/* Wait for the connection establishment.
+		 If the connection is pending, wait 10 milliseconds */
+		while (isPending(conn))
+			usleep(10000);
+		
 		printf("Connected.\n");
 		
 		/* Wait for the client to send us something */
-		if (!getData(conn, buffer, sizeof(buffer)))
+		if (getData(conn, buffer, sizeof(buffer)))
 		{
-			/* Always close the connection */
-			closeConnection(conn);
-			continue;
+			/* We ignore what the client sends,
+			   and always return the same response */
+			sendData(conn, serverResponse, strlen(serverResponse));
 		}
 		
-		/* We ignore what the client sends,
-		   and always return the same response */
-		sendData(conn, serverResponse, strlen(serverResponse));
-		
-		/* Always close open connections */
+		/* Always close an open connection! */
 		closeConnection(conn);
 	}
 	

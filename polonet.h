@@ -18,21 +18,23 @@
  *
  * Usage as a server:
  * - Call startListening() to start listening to connections on a port.
+ *   It returns 1 on success, 0 on error.
  * - getAvailableConnection() gets the next available incoming connection.
  *   If there is no incoming connection, 0 is returned.
  *
  * Managing a connection:
- * - isPending() determines if a connection is being established.
+ * - Before you can use a connection, it is pending. Use isPending() to
+ *   determine if a connection is being established.
  * - isConnected() determines if a connection is established.
  * - Call sendData() to send bytes to a connection. It returns
  *   the number of bytes sent.
  * - Call receiveData() to receive bytes from a connection. It returns
  *   the number of bytes received.
  * - Call closeConnection() to close a connection. You should always
- *   close connections you receive from openConnection() or
+ *   close the connections you receive from openConnection() or
  *   getAvailableConnection().
  * - Note: all calls are non-blocking.
- * - Note: when disconneted, isConnected() returns true until all data has
+ * - Note: when disconnected, isConnected() returns true until all data has
  *   been read with receiveData().
  */
 
