@@ -19,20 +19,21 @@
 
 #include "polonet.h"
 
-#define HOSTNAME "www.google.com"
+#define CONN_HOSTNAME "www.google.com"
+#define CONN_PORT 80
 
 char getCommand[] =
 "GET / HTTP/1.1\n"
 "Host:" HOSTNAME "\n"
 "\n";
 
-/* Convenience method to receive data */
+/* Blocking receiveData. It waits til data is received. */
 int getData(PolonetConn conn, char *buffer, int buffersize)
 {
-	int bytesReceived;
-	
 	while (isConnected(conn))
 	{
+		int bytesReceived;
+		
 		if (bytesReceived = receiveData(conn, buffer, buffersize))
 			return bytesReceived;
 		
@@ -48,40 +49,37 @@ int main(int argc, char *argv[])
 	PolonetConn conn;
 	char buffer[256];
 	int bytesReceived;
+	returnValue = 1;
 	
 	/* Open the connection */
-	if (!(conn = openConnection(HOSTNAME, 80)))
+	if ((conn = openConnection(HOSTNAME, 80)))
 	{
-		printf("Couldn't connect to " HOSTNAME ".\n");
-		return 1;
-	}
-	
-	/* Wait for the connection establishment.
-	   If the connection is pending, wait 10 milliseconds */
-	while (isPending(conn))
-		usleep(10000);
-	
-	if (!isConnected(conn))
-	{
-		/* Always close open connections */
-		closeConnection(conn);
+		/* Wait for the connection establishment.
+		   If the connection is pending, wait 10 milliseconds */
+		while (isPending(conn))
+			usleep(10000);
 		
-		printf("Connection refused from " HOSTNAME ".\n");
-		return 1;
+		if (isConnected(conn))
+		{
+			/* Send the GET command */
+			sendData(conn, getCommand, strlen(getCommand));
+			
+			/* Receive the response */
+			while (bytesReceived = getData(conn, buffer, sizeof(buffer) - 1))
+			{
+				buffer[bytesReceived] = '\0';
+				printf("%s", buffer);
+			}
+		}
+		else
+			printf("Connection refused from " HOSTNAME ".\n");
+		
+		/* Always close an open connection! */
+		closeConnection(conn);
 	}
+	else
+		printf("Couldn't connect to " HOSTNAME ".\n");
 	
-	/* Send the GET command */
-	sendData(conn, getCommand, strlen(getCommand));
-	
-	/* Receive the response */
-	while (bytesReceived = getData(conn, buffer, sizeof(buffer) - 1))
-	{
-		buffer[bytesReceived] = '\0';
-		printf("%s", buffer);
-	}
-	
-	closeConnection(conn);
-	
-	return 0;
+	return returnValue;
 }
 
