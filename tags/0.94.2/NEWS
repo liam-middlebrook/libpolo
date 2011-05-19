@@ -1,0 +1,26 @@
+==2011-05==
+* Fixed network examples
+* Fixed polonet documentation
+* Confirmed Windows libpolonet compatibility
+* Fixed Mac OS X libpolonet compatibility
+* Added libpolonet
+
+==2011-04==
+* Fixed mouse button callback
+* Fixed BMP compression madness
+* Fixed circles
+
+==2011-03==
+* Fixed mouse coordinate error in user callback
+* Corrected font selection
+* Fixed comments
+* Fixed rounded rect border error
+* Fixed vertical sync on Windows
+* Fixed vertical sync on Linux
+* Fixed demos
+* Fixed comments
+
+==2011-02==
+* Added 3D demo
+* Released preliminary version 0.9
+* First design
