@@ -22,7 +22,7 @@
 #include "polo.h"
 
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI    3.14159265358979323846
 #endif
 
 #ifndef GL_BGRA
@@ -36,8 +36,8 @@
 
 
 /* Definitions */
-#define POLO_MOUSEBUTTON_NUM	3
-#define POLO_MAX_IMAGES			1024
+#define POLO_MOUSEBUTTON_NUM    3
+#define POLO_MAX_IMAGES         1024
 
 typedef void (*PoloSwapControl)(int value);
 
@@ -63,6 +63,8 @@ typedef struct
 	Color fillColor1;
 	Color fillColor2;
 	PoloImage images[POLO_MAX_IMAGES];
+	Color drawTint;
+	float drawScale;
 	void *font;
 	float fontHeight;
 	float fontBaseLine;
@@ -103,8 +105,8 @@ static void drawCallback()
 	glLoadIdentity();
 	glTranslatef(-1.0, -1.0, 0.0);
 	glScalef(2.0 / glutGet(GLUT_WINDOW_WIDTH),
-			 2.0 / glutGet(GLUT_WINDOW_HEIGHT),
-			 1.0);
+	         2.0 / glutGet(GLUT_WINDOW_HEIGHT),
+	         1.0);
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -214,8 +216,8 @@ static void mouseMotionCallback(int x, int y)
 	
 	if (poloState.mouseMotionCallback)
 		poloState.mouseMotionCallback(poloState.userData,
-									  poloState.mouseX,
-									  poloState.mouseY);
+		                              poloState.mouseX,
+		                              poloState.mouseY);
 }
 
 static void mouseButtonCallback(int button, int state, int x, int y)
@@ -242,8 +244,8 @@ static void mouseButtonCallback(int button, int state, int x, int y)
 	
 	if (poloState.mouseButtonCallback)
 		poloState.mouseButtonCallback(poloState.userData,
-									  button,
-									  poloState.mouseButtonState[button]);
+		                              button,
+		                              poloState.mouseButtonState[button]);
 	
 	mouseMotionCallback(x, y);
 }
@@ -274,6 +276,8 @@ void initPolo(int width, int height, int fullscreen, const char *windowTitle)
 	/* Init state */
 	setPenColor(POLO_WHITE);
 	setFillColor(POLO_TRANSPARENT);
+	setDrawTint(POLO_WHITE);
+	setDrawScale(1.0);
 	setTextFont(POLO_HELVETICA_18);
 	
 	/* Init glut */
@@ -880,8 +884,8 @@ Image loadImage(const char *path)
 	compression = getLittleEndianValue(bmpHeader.compression, 32);
 	
 	if ((width > 4096) || (height > 4096) || (height < -4096) ||
-		(numberOfPlanes != 1) ||
-		((bytesPerPixel != 3) && (bytesPerPixel != 4)))
+	    (numberOfPlanes != 1) ||
+	    ((bytesPerPixel != 3) && (bytesPerPixel != 4)))
 		valid = 0;
 	
 	if (valid)
@@ -903,11 +907,11 @@ Image loadImage(const char *path)
 			if (height >= 0)
 				for (y = 0; y < height; y++)
 					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
-									  width * bytesPerPixel, 1, fp);
+					                  width * bytesPerPixel, 1, fp);
 			else
 				for (y = -height - 1; y >= 0; y--)
 					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
-									  width * bytesPerPixel, 1, fp);
+					                  width * bytesPerPixel, 1, fp);
 			
 			image = getFreeImage();
 			if (image)
@@ -925,9 +929,9 @@ Image loadImage(const char *path)
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
-					     textureWidth, textureHeight,
-					     0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
-					     GL_UNSIGNED_BYTE, p);
+				             textureWidth, textureHeight,
+				             0, (bytesPerPixel == 4) ? GL_BGRA : GL_BGR,
+				             GL_UNSIGNED_BYTE, p);
 				
 				glBindTexture(GL_TEXTURE_2D, 0);
 				
@@ -979,9 +983,10 @@ void freeImage(Image image)
 	poloState.images[image].height = 0;
 }
 
-void drawImage(float x, float y, Image image, Color tint)
+void drawImage(float x, float y, Image image)
 {
-	PoloImage *poloImage;
+	PoloImage *theImage;
+	float scale;
 	float texCoordWidth, texCoordHeight;
 	
 	if (!poloState.isInitialized)
@@ -990,29 +995,40 @@ void drawImage(float x, float y, Image image, Color tint)
 	if (image >= POLO_MAX_IMAGES)
 		return;
 	
-	poloImage = &poloState.images[image];
+	theImage = &poloState.images[image];
+	scale = poloState.drawScale;
 	
-	if (!poloImage->texture)
+	if (!theImage->texture)
 		return;
 	
-	texCoordWidth = ((float) poloImage->width) / poloImage->textureWidth;
-	texCoordHeight = ((float) poloImage->height) / poloImage->textureHeight;
+	texCoordWidth = ((float) theImage->width) / theImage->textureWidth;
+	texCoordHeight = ((float) theImage->height) / theImage->textureHeight;
 	
-	glBindTexture(GL_TEXTURE_2D, poloImage->texture);
+	glBindTexture(GL_TEXTURE_2D, theImage->texture);
+	setPoloColor(poloState.drawTint);
 	
-	setPoloColor(tint);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
 	glVertex2f(x, y);
 	glTexCoord2f(texCoordWidth, 0);
-	glVertex2f(x + poloImage->width, y);
+	glVertex2f(x + theImage->width * scale, y);
 	glTexCoord2f(texCoordWidth, texCoordHeight);
-	glVertex2f(x + poloImage->width, y + poloImage->height);
+	glVertex2f(x + theImage->width * scale, y + theImage->height * scale);
 	glTexCoord2f(0, texCoordHeight);
-	glVertex2f(x, y + poloImage->height);
+	glVertex2f(x, y + theImage->height * scale);
 	glEnd();
 	
 	glBindTexture(GL_TEXTURE_2D, 0);	
+}
+
+void setDrawTint(Color tint)
+{
+	poloState.drawTint = tint;
+}
+
+void setDrawScale(float scale)
+{
+	poloState.drawScale = scale;
 }
 
 void setTexture(Image image)

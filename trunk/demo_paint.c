@@ -13,13 +13,12 @@
 #include "polo.h"
 
 #define TOOLBAR_WIDTH 130
-#define BRUSH_ALPHA 0.1
+#define BRUSH_ALPHA 0.2
 
 typedef struct
 {
 	Image brush;
 	int frame;
-	Color tint;
 } DemoData;
 
 void draw(void *userData)
@@ -40,14 +39,14 @@ void draw(void *userData)
 	if (isMouseButtonPressed(0))
 	{
 		if ((getMouseX() < 128) && (getMouseY() < 128))
-			d->tint = getColorFromHSVA(getMouseX() / 128,
-									   getMouseY() / 128,
-									   1,
-									   BRUSH_ALPHA);
+			setDrawTint(getColorFromHSVA(getMouseX() / 128,
+			                             getMouseY() / 128,
+			                             1,
+			                             BRUSH_ALPHA));
 		else
 			drawImage(getMouseX() - getImageWidth(d->brush) / 2,
-					  getMouseY() - getImageHeight(d->brush) / 2,
-					  d->brush, d->tint);
+			          getMouseY() - getImageHeight(d->brush) / 2,
+			          d->brush);
 	}
 	
 	/* Draw left bar */
@@ -59,8 +58,8 @@ void draw(void *userData)
 	setPenColor(POLO_BLACK);
 	sprintf(buf, "FPS: %.3f", d->frame / (getTime() + 0.001));
 	drawText((TOOLBAR_WIDTH - getTextDrawWidth(buf)) / 2,
-			 getScreenHeight() - getTextDrawHeight(buf) - 10,
-			 buf);
+	         getScreenHeight() - getTextDrawHeight(buf) - 10,
+	         buf);
 	
 	/* Increment frame number */
 	d->frame++;
@@ -70,8 +69,8 @@ void draw(void *userData)
 		for (y = 0; y < 128; y++)
 		{
 			setPenColor(getColorFromHSV(x / 128.0,
-										y / 128.0,
-										1.0));
+			                            y / 128.0,
+			                            1.0));
 			drawPoint(x, y);
 		}
 }
@@ -86,9 +85,9 @@ int main(int argc, char *argv[])
 	/* Init variables */
 	setPoloUserData(&demoData);
 	setDrawCallback(draw);
+	setDrawTint(getColorFromHSVA(0.0, 0.0, 1.0, BRUSH_ALPHA));
 	demoData.brush = loadImage("brush.bmp");
 	demoData.frame = 0;
-	demoData.tint = getColorFromRGBA(1, 1, 1, BRUSH_ALPHA);
 	
 	/* Run polo */
 	runPolo();
