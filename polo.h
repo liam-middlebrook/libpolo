@@ -206,7 +206,9 @@ void drawText(float x, float y, const char *str);
 Image loadImage(const char *path);
 float getImageWidth(Image image);
 float getImageHeight(Image image);
-void drawImage(float x, float y, Image image, Color tint);
+void drawImage(float x, float y, Image image);
+void setDrawTint(Color tint);
+void setDrawScale(float scale);
 void setTexture(Image image);
 void freeImage(Image image);
 
