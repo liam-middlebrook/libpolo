@@ -20,7 +20,7 @@
  * Drawing:
  * - The coordinate origin (0, 0) is at the lower left.
  * - Color components (RGBA, HSVA) are in the range 0.0 to 1.0.
- * - Alpha is the level of opacity.
+ * - Alpha is the level of opacity (0.0 is transparent, 1.0 is opaque).
  * - Drawing primitives are rendered using a border color (use setPenColor())
  *   and fill color (setFillColor() or setFillGradient()).
  *
@@ -29,14 +29,16 @@
  * - Make sure you called initPolo before loading images.
  * - Use loadImage() to load a BMP file from disk. You will get an Image reference.
  *   If the image could not be loaded you get the value 0.
- * - Use drawImage() to draw an image to screen. The tint parameter lets you tint
- *   your image with a color or alpha. To just paint, use tint color POLO_WHITE.
+ * - Use drawImage() to draw an image to screen.
+ * - Use drawSetTint() to set the tint parameter. This lets you tint your image
+     with a color and alpha. To just paint, use tint POLO_WHITE.
  * - Use freeImage() after you finished using your image.
- * - You can call setTexture() to fill drawing primitives with a texture.
- *   Make sure the width and height of your image is a power of 2 when using this.
+ * - Call setTexture() to fill drawing primitives with a texture.
+ *   Make sure the width and height of your image is a power of 2 when using
+ *   textures.
  *
  * Keyboard and mouse:
- * - You can use getKey(), getMouseX(), getMouseY() and getMouseButtonState()
+ * - Use getKey(), getMouseX(), getMouseY() and getMouseButtonState()
  *   to query the keyboard and mouse. Use clearKey() to clear a read key.
  * - Keyboard codes are in UNICODE. Special keys are defined in PoloKeys.
  *
