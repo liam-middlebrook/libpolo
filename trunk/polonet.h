@@ -45,7 +45,7 @@
 extern "C" {
 #endif
 
-#define PolonetConn int;
+#define PolonetConn int
 
 /* Client functions */
 PolonetConn openConnection(char *hostname, unsigned short port);
