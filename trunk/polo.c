@@ -19,6 +19,10 @@
 #include <GL/glx.h>
 #endif
 
+#ifdef _WIN32
+#include <GL/glext.h>
+#endif
+
 #include "polo.h"
 
 #ifndef M_PI
