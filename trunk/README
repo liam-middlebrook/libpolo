@@ -2,7 +2,7 @@
 
 libpolo is a lightweight graphics, network and sound library for educational environments.
 
-It is aimed towards students learning the C and C++ language, and is very suitable for high school and first-year university courses. Its functionality is built around the GLUT library, providing a streamlined interface and full access to OpenGL. A feature list:
+It is aimed towards students learning the C and C++ language, and is very suitable for high school and first-year university courses. Its functionality is built around the GLUT library. It provides a streamlined interface, also allowing full access to the OpenGL API. A feature list:
 
 * 2D primitives (point, line, rect, quad, triangle, circle and a rounded rect)
 * pen stroke and solid/gradient/texture fill for all primitives
