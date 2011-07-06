@@ -1,0 +1,97 @@
+=libpolo installation instructions=
+
+Copyright 2011 by
+Marc S. Ressl, mressl@gmail.com
+Jorge Prendes, jorge.prendes@gmail.com
+
+
+
+==polo dependencies==
+
+libpolo requires the GLUT library. Follow these steps to install GLUT on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  sudo apt-get install freeglut3-dev
+
+===Mac OS X===
+
+* GLUT is already installed.
+
+===Microsoft Windows===
+
+* Download the GLUT binary distribution from
+
+  http://www.xmission.com/~nate/glut.html
+
+* Copy the .lib and .dll files to your "lib" folder (create one if you don't have one).
+* Copy the .h file to your "include" folder (create one if you don't have one).
+* Add the lib and include folders to your project configuration (if you haven't yet).
+
+
+
+==polosnd dependencies==
+
+libpolosnd requires the PortAudio and libsndfile libraries. Follow these steps to install them on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  sudo apt-get install portaudio19-dev
+  sudo apt-get install libsndfile1-dev
+
+===Mac OS X===
+
+* Install MacPorts (from http://www.macports.org). Then follow these steps on the command line:
+
+  sudo port install portaudio
+  sudo port install libsndfile
+
+===Microsoft Windows===
+
+* Download portaudio from http://www.portaudio.com/ . Follow installation instructions.
+* Download libsndfile from www.mega-nerd.com/libsndfile/ . Follow installation instructions.
+
+
+
+==Compiling the demos==
+
+==Linux==
+
+At the command line, type:
+
+  gcc -o demo_helloworld -l glut -l GLU polo.c demo_helloworld.c
+  gcc -o demo_paint -l glut -l GLU polo.c demo_paint.c
+  gcc -o demo_3d -l glut -l GLU polo.c demo_3d.c
+  gcc -o demo_netclient polo.c demo_3d.c
+  gcc -o demo_netserver GLU polo.c demo_3d.c
+  gcc -o demo_sound -l sndfile -l portaudio polo.c demo_sound.c
+
+==Mac OS X==
+
+At the command line, type:
+
+  gcc -o demo_helloworld -framework GLUT -framework OpenGL polo.c demo_helloworld.c
+  gcc -o demo_paint -framework GLUT -framework OpenGL polo.c demo_paint.c
+  gcc -o demo_3d -framework GLUT -framework OpenGL polo.c demo_3d.c
+  gcc -o demo_netclient polo.c demo_3d.c
+  gcc -o demo_netserver GLU polo.c demo_3d.c
+  gcc -o demo_sound -l sndfile -l portaudio polo.c demo_sound.c
+
+==Microsoft Visual Studio 2008==
+
+* Create a new project
+* Choose "Win32 Console Application"
+* Choose "Empty project"
+* Put the files polo.c and demo_helloworld.c (or demo_paint.c, demo_3d.c, etc. for the other demos) in the project
+* Go to Project > Properties
+* In the Configuration list box, select "All Configurations"
+* In C/C++ > General > Additional Include Directories, add the path to your include folder
+* In Linker > Input > Additional Dependencies. Type "opengl32.lib glu32.lib glut32.lib"
+* In Linker > General > Additional Library Directories, add the path to your lib folder
+* In Build Events > Post Build Event, add this entry: "copy [path to your glut32.dll] [path to your executable file]" 
+* Compile and enjoy
+
