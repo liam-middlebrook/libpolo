@@ -9,6 +9,8 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+
 #include "polosnd.h"
 
 int main(int argc, char *argv[])
@@ -26,7 +28,7 @@ int main(int argc, char *argv[])
 	
 	/* Play again */
 	playSound("demo_sound.ogg");
-	sleep(3);
+	sleep(2);
 	
 	/* Close the sound device */
 	closeSound();

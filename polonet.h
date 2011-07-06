@@ -48,7 +48,7 @@ extern "C" {
 #define PolonetConn int
 
 /* Client functions */
-PolonetConn openConnection(char *hostname, unsigned short port);
+PolonetConn openConnection(const char *hostname, unsigned short port);
 
 /* Server functions */
 int startListening(unsigned short port);

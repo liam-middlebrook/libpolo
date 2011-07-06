@@ -29,7 +29,9 @@ static int runSound(const void *inputBuffer,
 {
 	memset(outputBuffer, 0, framesPerBuffer * soundInfo.channels * sizeof(short));
 
-	sf_read_short(soundFile, outputBuffer, framesPerBuffer * soundInfo.channels);
+	sf_read_short(soundFile,
+	              (short *)outputBuffer,
+	              framesPerBuffer * soundInfo.channels);
 	
 	return paContinue;
 }
@@ -37,7 +39,7 @@ static int runSound(const void *inputBuffer,
 int openSound()
 {
 	if (isSoundInitialized)
-		return;
+		return 0;
 	
 	isSoundInitialized = (Pa_Initialize() == paNoError);
 	
@@ -56,7 +58,7 @@ void closeSound()
 	}
 }
 
-int playSound(char *path)
+int playSound(const char *path)
 {
 	PaStreamParameters outputParameters;
 	

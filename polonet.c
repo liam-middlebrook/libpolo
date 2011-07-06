@@ -162,7 +162,7 @@ PolonetConn getAvailableConnection()
 	return fd + 1;
 }
 
-PolonetConn openConnection(char *hostname, unsigned short port)
+PolonetConn openConnection(const char *hostname, unsigned short port)
 {
 	struct hostent *host;
 	struct sockaddr_in sin;
