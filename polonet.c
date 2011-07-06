@@ -111,7 +111,7 @@ int startListening(unsigned short port)
 	
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr =  htonl(INADDR_ANY);
+	sin.sin_addr.s_addr = htonl(INADDR_ANY);
 	sin.sin_port = htons(port);
 	
 	if (bind(fdserver, (struct sockaddr *) &sin, sizeof(sin)) == -1)
@@ -139,6 +139,7 @@ PolonetConn getAvailableConnection()
 {
 	fd_set fdsRead;
 	struct timeval nowait;
+	int fd;	
 	
 	if (fdserver == -1)
 		return 0;
@@ -154,7 +155,11 @@ PolonetConn getAvailableConnection()
 	if (!FD_ISSET(fdserver, &fdsRead))
 		return 0;
 	
-	return accept(fdserver, NULL, NULL) + 1;
+	fd = accept(fdserver, NULL, NULL);
+	
+	polonetSetNonBlocking(fd);
+	
+	return fd + 1;
 }
 
 PolonetConn openConnection(char *hostname, unsigned short port)

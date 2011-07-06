@@ -6,7 +6,7 @@ Jorge Prendes, jorge.prendes@gmail.com
 
 
 
-==GLUT==
+==polo dependencies==
 
 libpolo requires the GLUT library. Follow these steps to install GLUT on your operating system.
 
@@ -32,6 +32,31 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 
 
 
+==polosnd dependencies==
+
+libpolosnd requires the PortAudio and libsndfile libraries. Follow these steps to install them on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  sudo apt-get install portaudio19-dev
+  sudo apt-get install libsndfile1-dev
+
+===Mac OS X===
+
+* Install MacPorts (from http://www.macports.org). Then follow these steps on the command line:
+
+  sudo port install portaudio
+  sudo port install libsndfile
+
+===Microsoft Windows===
+
+* Download portaudio from http://www.portaudio.com/ . Follow installation instructions.
+* Download libsndfile from www.mega-nerd.com/libsndfile/ . Follow installation instructions.
+
+
+
 ==Compiling the demos==
 
 ==Linux==
@@ -43,6 +68,7 @@ At the command line, type:
   gcc -o demo_3d -l glut -l GLU polo.c demo_3d.c
   gcc -o demo_netclient polo.c demo_3d.c
   gcc -o demo_netserver GLU polo.c demo_3d.c
+  gcc -o demo_sound -l sndfile -l portaudio polo.c demo_sound.c
 
 ==Mac OS X==
 
@@ -53,6 +79,7 @@ At the command line, type:
   gcc -o demo_3d -framework GLUT -framework OpenGL polo.c demo_3d.c
   gcc -o demo_netclient polo.c demo_3d.c
   gcc -o demo_netserver GLU polo.c demo_3d.c
+  gcc -o demo_sound -l sndfile -l portaudio polo.c demo_sound.c
 
 ==Microsoft Visual Studio 2008==
 
@@ -67,3 +94,4 @@ At the command line, type:
 * In Linker > General > Additional Library Directories, add the path to your lib folder
 * In Build Events > Post Build Event, add this entry: "copy [path to your glut32.dll] [path to your executable file]" 
 * Compile and enjoy
+

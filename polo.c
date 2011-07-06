@@ -903,19 +903,25 @@ Image loadImage(const char *path)
 		
 		if (p)
 		{
-			size_t bytesRead;
+			int padding = (4 - (width * bytesPerPixel) & 0x3) & 0x3;
 			
 			fseek(fp, pixelsOffset, SEEK_SET);
 			
 			/* Read image line by line */
 			if (height >= 0)
 				for (y = 0; y < height; y++)
-					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
-					                  width * bytesPerPixel, 1, fp);
+				{
+					fread(&p[y * textureWidth * bytesPerPixel],
+					      width * bytesPerPixel, 1, fp);
+					fseek(fp, padding, SEEK_CUR);
+				}
 			else
 				for (y = -height - 1; y >= 0; y--)
-					bytesRead = fread(&p[y * textureWidth * bytesPerPixel],
-					                  width * bytesPerPixel, 1, fp);
+				{
+					fread(&p[y * textureWidth * bytesPerPixel],
+					      width * bytesPerPixel, 1, fp);
+					fseek(fp, padding, SEEK_CUR);
+				}
 			
 			image = getFreeImage();
 			if (image)

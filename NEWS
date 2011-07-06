@@ -1,3 +1,8 @@
+==2011-06==
+* Added polosnd
+* Fixed polonet receiveData() when running a server connection (was blocking)
+* Fixed BMP width alignment when loading images
+
 ==2011-05==
 * Improved polo image interface: added setDrawTint and setDrawScale
 * Fixed network examples
