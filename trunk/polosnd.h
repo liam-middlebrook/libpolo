@@ -31,7 +31,7 @@ extern "C" {
 int openSound();
 void closeSound();
 
-int playSound(char *path);
+int playSound(const char *path);
 void stopSound();
 
 #ifdef __cplusplus
