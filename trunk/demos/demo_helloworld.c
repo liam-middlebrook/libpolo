@@ -9,7 +9,7 @@
  */
 
 #include <stdio.h>
-#include "polo.h"
+#include <polo/polo.h>
 
 void draw(void *userData)
 {

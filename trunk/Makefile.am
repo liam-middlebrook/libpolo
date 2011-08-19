@@ -44,7 +44,7 @@ libpolo_la_LIBADD = $(sndfile_LIBS)
 libpolo_la_LDFLAGS = -version-info $(POLO_VERSION)
 
 ## Define the list of public header files and their install location.
-libpolo_includedir = $(includedir)/libpolo/
+libpolo_includedir = $(includedir)/polo/
 libpolo_include_HEADERS = src/polo.h \
                           src/polonet.h \
                           src/polosnd.h
@@ -60,7 +60,7 @@ libpolo_include_HEADERS = src/polo.h \
 ## in _HEADERS variables are normally included in the distribution, but the
 ## configuration header file is generated at configure time and should not be
 ## shipped with the source tarball.
-libpolo_libincludedir = $(libdir)/libpolo/include
+libpolo_libincludedir = $(libdir)/polo/include
 
 ## Install the generated pkg-config file (.pc) into the expected location for
 ## architecture-dependent package configuration information.  Occasionally,

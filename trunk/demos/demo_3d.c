@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "polo.h"
+#include <polo/polo.h>
 
 #define DEMO_FIELD_OF_VIEW	45
 #define DEMO_NEAR_PLANE		1

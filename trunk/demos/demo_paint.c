@@ -10,7 +10,7 @@
  */
 
 #include <stdio.h>
-#include "polo.h"
+#include <polo/polo.h>
 
 #define TOOLBAR_WIDTH 130
 #define BRUSH_ALPHA 0.2
