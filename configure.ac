@@ -22,7 +22,7 @@ LT_INIT()
 # For information on how to properly maintain the library version information,
 # refer to the libtool manual, section "Updating library version information":
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-AC_SUBST([POLO_VERSION], [0:96:1])
+AC_SUBST([POLO_VERSION], [0:105:0])
 
 # Check for dependencies
 PKG_CHECK_MODULES([portaudio], [portaudio-2.0 >= 19])
