@@ -8,4 +8,4 @@ Description: A lightweight graphics, sound and network library for educational e
 Version: @PACKAGE_VERSION@
 URL: @PACKAGE_URL@
 Libs: -L${libdir} -lpolo
-Cflags: -I${includedir}/libpolo -I${libdir}/libpolo/include
+Cflags: -I${includedir}/polo -I${libdir}/polo/include

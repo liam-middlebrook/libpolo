@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "polosnd.h"
+#include <polo/polosnd.h>
 
 int main(int argc, char *argv[])
 {

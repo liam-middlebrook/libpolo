@@ -19,7 +19,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "polonet.h"
+#include <polo/polonet.h>
 
 #define CONN_PORT 8080
 

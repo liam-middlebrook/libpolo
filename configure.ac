@@ -2,7 +2,7 @@
 ## A lightweight graphics, sound and network library for educational
 ## environments
 
-AC_INIT([libpolo], [0.96], [libpolo@googlegroups.com], [libpolo],
+AC_INIT([libpolo], [0.96.1], [libpolo@googlegroups.com], [libpolo],
         [http://code.google.com/p/libpolo])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
@@ -22,13 +22,13 @@ LT_INIT()
 # For information on how to properly maintain the library version information,
 # refer to the libtool manual, section "Updating library version information":
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-AC_SUBST([POLO_VERSION], [0:96:0])
+AC_SUBST([POLO_VERSION], [0:96:1])
 
 # Check for dependencies
 PKG_CHECK_MODULES([portaudio], [portaudio-2.0 >= 19])
 PKG_CHECK_MODULES([sndfile], [sndfile >= 1.0.23])
 
-# Since freeglud doesn't support pkg-config, we check it like this.
+# freeglut doesn't support pkg-config, manual check:
 AC_CHECK_LIB([glut], [glutInit], ,
              [AC_MSG_ERROR([GLUT not found])])
 
