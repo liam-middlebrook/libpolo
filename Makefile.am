@@ -72,4 +72,6 @@ pkgconfig_DATA = libpolo.pc
 ## Define an independent executable script for inclusion in the distribution
 ## archive.  However, it will not be installed on an end user's system due to
 ## the noinst_ prefix.
-dist_noinst_SCRIPTS = autogen.sh
+## dist_noinst_SCRIPTS = autogen.sh
+dist_noinst_DATA = demos/brush.bmp demos/demo.bmp demos/demo_3d.c demos/demo_helloworld.c demos/demo_netclient.c demos/demo_netserver.c demos/demo_paint.c demos/demo_sound.c demos/demo_sound.ogg demos/Makefile demos/wood.bmp
+
