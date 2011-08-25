@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "polo.h"
+
 #if (!defined(_WIN32) && !defined(__APPLE__))
 #include <GL/glx.h>
 #endif
@@ -22,8 +24,6 @@
 #ifdef _WIN32
 #include <GL/glext.h>
 #endif
-
-#include "polo.h"
 
 #ifndef M_PI
 #define M_PI    3.14159265358979323846
