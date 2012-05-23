@@ -1,0 +1,87 @@
+==libpolo==
+
+libpolo is a lightweight graphics, network and sound library for educational environments.
+
+It is aimed towards students learning the C and C++ language, and is very suitable for high school and first-year university courses. Its functionality is built around the GLUT library. It provides a streamlined interface, also allowing full access to the OpenGL API. A feature list:
+
+* 2D primitives (point, line, rect, quad, triangle, circle and a rounded rect)
+* pen stroke and solid/gradient/texture fill for all primitives
+* texture uploading from BMP files (RGB, RGBA formats)
+* simple mouse and keyboard handling
+* RGB and HSV color spaces
+
+The network module supports unlimited TCP/IP connections, both in client and server mode.
+
+The sound module is capable of playing back WAV, AIFF and OGG files.
+
+It is cross-platform, and works under Linux, Mac OS X and Windows.
+
+It is very easy to integrate in a project. Just install and include <polo/polo.h>. For libpolonet, include <polo/polonet.h>. For libpolosnd, include <polo/polosnd.h>.
+
+Copyright 2011 by
+Marc S. Ressl, mressl@gmail.com
+Jorge Prendes, jorge.prendes@gmail.com
+
+
+
+==polo Dependencies==
+
+libpolo requires the GLUT library. Follow these steps to install GLUT on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  sudo apt-get install freeglut3-dev
+
+===Mac OS X===
+
+* GLUT is already installed.
+
+===Microsoft Windows===
+
+* Download the GLUT binary distribution from
+
+  http://www.xmission.com/~nate/glut.html
+
+* Copy the .lib and .dll files to your "lib" folder (create one if you don't have one).
+* Copy the .h file to your "include" folder (create one if you don't have one).
+* Add the lib and include folders to your project configuration (if you haven't yet).
+
+
+
+==polosnd dependencies==
+
+libpolosnd requires the PortAudio and libsndfile libraries. Follow these steps to install them on your operating system.
+
+===Debian or Ubuntu Linux==
+
+* From the command line, enter
+
+  sudo apt-get install portaudio19-dev
+  sudo apt-get install libsndfile1-dev
+
+===Mac OS X===
+
+* Install MacPorts (from http://www.macports.org). Then follow these steps on the command line:
+
+  sudo port install portaudio
+  sudo port install libsndfile
+
+===Microsoft Windows===
+
+* Download portaudio from http://www.portaudio.com/ . Follow installation instructions.
+* Download libsndfile from www.mega-nerd.com/libsndfile/ . Follow installation instructions.
+
+
+
+==polonet dependencies==
+
+On Windows, libpolonet must be linked to the ws2_32.lib library. Linux and Mac OS X have no spetial requirements.
+
+
+
+==Compiling the demos==
+
+To compile the demos, run "make" in the "demos" folder.
+
