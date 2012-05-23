@@ -22,7 +22,9 @@ Copyright 2011 by
 Marc S. Ressl, mressl@gmail.com
 Jorge Prendes, jorge.prendes@gmail.com
 
-==Dependencies==
+
+
+==polo Dependencies==
 
 libpolo requires the GLUT library. Follow these steps to install GLUT on your operating system.
 
@@ -46,6 +48,8 @@ libpolo requires the GLUT library. Follow these steps to install GLUT on your op
 * Copy the .h file to your "include" folder (create one if you don't have one).
 * Add the lib and include folders to your project configuration (if you haven't yet).
 
+
+
 ==polosnd dependencies==
 
 libpolosnd requires the PortAudio and libsndfile libraries. Follow these steps to install them on your operating system.
@@ -68,6 +72,14 @@ libpolosnd requires the PortAudio and libsndfile libraries. Follow these steps t
 
 * Download portaudio from http://www.portaudio.com/ . Follow installation instructions.
 * Download libsndfile from www.mega-nerd.com/libsndfile/ . Follow installation instructions.
+
+
+
+==polonet dependencies==
+
+On Windows, libpolonet must be linked to the ws2_32.lib library. Linux and Mac OS X have no spetial requirements.
+
+
 
 ==Compiling the demos==
 
