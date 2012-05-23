@@ -1,3 +1,6 @@
+==2012-06==
+* Fixed blocking behaviour on Windows client mode.
+
 ==2011-06==
 * Added polosnd
 * Fixed polonet receiveData() when running a server connection (was blocking)

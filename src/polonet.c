@@ -59,7 +59,7 @@ static int polonetSetNonBlocking(int fd)
 {
 #ifdef WIN32
 	unsigned long isNonBlocking = 1;
-	return ioctlsocket(fdserver, FIONBIO, &isNonBlocking) != -1;
+	return ioctlsocket(fd, FIONBIO, &isNonBlocking) != -1;
 #else
 	int flags = fcntl(fd, F_GETFL, 0);
 	if (flags == -1)
@@ -268,11 +268,12 @@ int isConnected(PolonetConn conn)
 int sendData(PolonetConn conn, char *buffer, const int bufferSize)
 {
 	int fd = conn - 1;
-	
+	int status;
+
 	if (fd == -1)
 		return 0;
 	
-	int status = send(fd, buffer, bufferSize, 0);
+	status = send(fd, buffer, bufferSize, 0);
 	if (status == -1)
 		return 0;
 	
@@ -282,11 +283,12 @@ int sendData(PolonetConn conn, char *buffer, const int bufferSize)
 int receiveData(PolonetConn conn, char *buffer, const int bufferSize)
 {
 	int fd = conn - 1;
-	
+	int status;
+
 	if (fd == -1)
 		return 0;
 
-	int status = recv(fd, buffer, bufferSize, 0);
+	status = recv(fd, buffer, bufferSize, 0);
 	if (status == -1)
 		return 0;
 	
@@ -299,3 +301,4 @@ void closeConnection(PolonetConn conn)
 	
 	polonetCloseSocket(fd);
 }
+
