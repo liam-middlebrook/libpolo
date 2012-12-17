@@ -524,11 +524,25 @@ void drawPoint(float x, float y)
 
 void drawLine(float x1, float y1, float x2, float y2)
 {
+  float length;
+  
 	if (!poloState.isInitialized)
 		return;
 	
-	x2 += (x2 < x1) ? -1.0 : 1.0;
-	y2 += (y2 < y1) ? -1.0 : 1.0;
+   length = sqrt( (x2-x1)*(x1-x2) + (y2-y1)*(y2-y1) );
+  
+  if(length > 0)
+  {
+    x1 += (x1-x2) / (2*length);
+    x2 += (x2-x1) / (2*length);
+    y1 += (y1-y2) / (2*length);
+    y2 += (y2-y1) / (2*length);
+  }
+  else
+  {
+    x1 -= 0.5;
+    x2 += 0.5;
+  }
 	
 	/* Translate coordinates to pixel center */
 	glBegin(GL_LINES);
